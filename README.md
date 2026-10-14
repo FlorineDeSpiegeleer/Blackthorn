@@ -1,21 +1,44 @@
-# Blackthorn Academy
+# Blackthorn Academy — The Veiled Moon
 
-English-language interactive mystery and romance game for three players, with separate private phone views, a shared projector view and a local game-master server.
+A premium English-language, dark-academia interactive story featuring three friends, separate personal romantic storylines, and a central mystery.
 
-## Current version
+## What is in this public repository
 
-The latest packaged prototype is **V15**. This repository is being initialized; **the game application files have not yet been uploaded**. A README alone is not a working installation.
+- `index.html` — elegant responsive web interface
+- `style.css` — cinematic dark-academia styling
+- `game.js` — **interactive, spoiler-safe public preview** with:
+  - projector preview and individual Florine / Maxine / Sam tabs;
+  - 12 sample public story beats;
+  - 18 optional one-to-one romantic interactions (5 Florine, 7 Maxine, 6 Sam);
+  - three answers per encounter, responses and browser-local journal;
+  - a preview-only director navigation view;
+  - optional, synthetic UI sound.
+- `nieuwe fotos_SFM/` — images uploaded by the repository owner.
 
-## Import the complete V15 package
+## Open the preview
 
-Extract `BLACKTHORN_PRIVATE_GAME_V15.zip` and upload the **contents of the extracted `BLACKTHORN_PRIVATE_GAME_V15` folder** to the repository root (not the outer folder and not just the ZIP). Keep directory structures such as `assets/` intact. The prototype uses `server.py`, `index.html`, `english_presentation.py`, `_canonical_private.json`, and binary audio/image assets.
+Open `index.html` in a browser, or enable GitHub Pages for this repository and use the generated URL. **A Pages URL has not yet been confirmed.**
 
-## Important security note
+### Important: this is NOT the full game
 
-**This repository is public.** The V15 archive includes `_canonical_private.json` with GM-only story content. Anyone can inspect files committed to a public GitHub repository. Do not upload the canonical private data to a public repo if the mystery must remain secret. For actual play, host the server privately and distribute only limited player-role links.
+This public preview is intentionally **not** the complete Blackthorn murder mystery. It does not include the approved 47-scene / 55-flow private server package, multi-phone synchronization, GM-only canonical evidence, verified solutions to the four research puzzles, or an approved final reveal. The public demo scenes are presentation samples and are not intended to replace the original story canon.
 
-## Release status
+The previous, separately packaged private V15 prototype remains the more complete codebase, but it has unfinished puzzle validation, final approval and end-to-end playtesting. Those are real blockers to advertising a final playable experience.
 
-V15 is a prototype, not a verified final game. Four puzzle answers have not been independently validated for automatic scoring; the gameplay currently uses GM review. The finale is a new draft requiring story approval, and a full three-phone/projector playtest is still needed.
+## Security
 
-See `START_HERE.md` and `REVIEW_THIS_FIRST.md` in the V15 package for local setup and review guidance.
+This repository is **public**. A hidden story secret committed here is immediately accessible to anyone who can browse GitHub, even without a shared link. Do **not** commit `_canonical_private.json`, server-side secrets, role tokens, original GM-only evidence files or unreleased reveal text.
+
+A real three-phone/projection game should run on a private backend that issues role-bound links and reveals only the current scene and permitted player-specific data.
+
+## Latest status
+
+- Public visual/interactive preview: **uploaded**
+- Owner-supplied photos: **present**
+- Full private-server V15 package: **not uploaded**
+- Complete playable mystery: **not yet validated**
+- Publication of mystery spoilers: **intentionally avoided**
+
+## Review checklist
+
+Check narrative continuity and outfits for ball vs academy days; review the 18 sample romance beats against the approved story; verify image filenames; conduct independent puzzle tests on the *private* package; test 3-phone reconnect, role separation and recovery; approve the separately drafted finale before release.
