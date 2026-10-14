@@ -46,7 +46,7 @@ let state;try{state=JSON.parse(localStorage.getItem(stateKey)||'{}')}catch{state
 state={role:'projector',scene:0,answers:{},notes:{},paused:false,started:false,introStep:0,introChoice:null,...state};
 const safeRole=x=>['projector','florine','maxine','sam','gm'].includes(x)?x:'projector';
 const roleFromURL=new URLSearchParams(location.search).get('view');
-if(roleFromURL){state.role=safeRole(roleFromURL);if(['florine','maxine','sam','projector','gm'].includes(roleFromURL))state.started=false;}
+if(roleFromURL){state.role=safeRole(roleFromURL);}
 state.scene=Math.max(0,Math.min(sceneList.length-1,Number(state.scene)||0));
 let soundOn=false,ctx=null,osc=null;
 const $=id=>document.getElementById(id);
@@ -91,7 +91,7 @@ function renderIntro(){
  const overlay=$('introOverlay');if(!overlay)return;
  overlay.hidden=Boolean(state.started);
  if(state.started)return;
- const step=Math.max(0,Math.min(4,Number(state.introStep)||0));
+ const step=Math.max(0,Math.min(5,Number(state.introStep)||0));
  const bg=$('introBg'),tag=$('introTag'),title=$('introHeadline'),body=$('introBody'),controls=$('introControls'),bottom=$('introBottom');
  body.replaceChildren();controls.replaceChildren();
  const action=(label,callback,cls)=>{const b=button(label,()=>{if(state.paused)return;callback()},cls||'primary');controls.append(b);return b};
