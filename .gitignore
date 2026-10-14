@@ -1,0 +1,19 @@
+# Runtime secrets — never commit
+_private_session.json
+_private_access.json
+*.tmp
+__pycache__/
+*.pyc
+.env
+.env.*
+
+# Secret source data: do not upload to public repositories
+_canonical_private.json
+*GM_ONLY*
+*DO_NOT_OPEN*
+BLACKTHORN_APPROVED_STORY_SOURCE_HANDOFF.zip
+BLACKTHORN_V15_EXTERNAL_AI_REVIEW_HANDOFF.zip
+
+# Local archives and build output
+*.zip
+.DS_Store
