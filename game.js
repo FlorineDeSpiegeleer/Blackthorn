@@ -70,4 +70,14 @@ function move(delta){if(state.paused)return;let n=Math.max(0,Math.min(sceneList.
 document.querySelectorAll('[data-role]').forEach(b=>b.addEventListener('click',()=>{if(state.paused)return;state.role=safeRole(b.dataset.role);save();render()}));
 $('sound').addEventListener('click',()=>{if(state.paused)return;soundOn=!soundOn;$('sound').textContent=soundOn?'♪ Audio on':'♪ Audio off';if(soundOn)playTone(520)});
 document.addEventListener('keydown',e=>{if(!state.paused&&state.role==='gm'&&e.target.tagName!=='TEXTAREA'){if(e.key==='ArrowRight')move(1);if(e.key==='ArrowLeft')move(-1)}});
-save();render();
+
+$('pauseGame').addEventListener('click',()=>setPaused(!state.paused));
+$('resumeGame').addEventListener('click',()=>setPaused(false));
+document.addEventListener('keydown',e=>{
+  if((e.key==='p'||e.key==='P')&&!e.altKey&&!e.ctrlKey&&!e.metaKey&&!['INPUT','TEXTAREA'].includes(e.target.tagName)){e.preventDefault();setPaused(!state.paused);}
+});
+window.addEventListener('storage',e=>{
+  if(e.key!==stateKey||!e.newValue)return;
+  try{const latest=JSON.parse(e.newValue);state.paused=Boolean(latest.paused);syncPauseUI()}catch{}
+});
+save();render();syncPauseUI();
