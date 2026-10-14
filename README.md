@@ -42,3 +42,9 @@ A real three-phone/projection game should run on a private backend that issues r
 ## Review checklist
 
 Check narrative continuity and outfits for ball vs academy days; review the 18 sample romance beats against the approved story; verify image filenames; conduct independent puzzle tests on the *private* package; test 3-phone reconnect, role separation and recovery; approve the separately drafted finale before release.
+
+## Pause and resume (public preview)
+
+Press **Pause** at any time, including during a private romantic choice or director navigation. The pause overlay hides the story, freezes scene navigation and answers, and silences UI audio. Select **Resume** to continue where you left off. Press **P** as a keyboard shortcut. The paused state is stored in browser storage and survives refresh; tabs in the same browser profile receive pause updates.
+
+**Important limitation:** GitHub Pages is a static preview. Different phones do **not** share pause state, choices or timers. The final private-server build must implement server-authoritative pause/resume, freezing countdowns, queueing or rejecting player actions during pause, and broadcasting the state to all devices. This is not yet done.
