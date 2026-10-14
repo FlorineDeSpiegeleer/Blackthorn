@@ -43,10 +43,10 @@ sam:[
 ]};
 const stateKey='blackthorn_public_preview_2026';
 let state;try{state=JSON.parse(localStorage.getItem(stateKey)||'{}')}catch{state={}}
-state={role:'projector',scene:0,answers:{},notes:{},paused:false,...state};
+state={role:'projector',scene:0,answers:{},notes:{},paused:false,started:false,introStep:0,introChoice:null,...state};
 const safeRole=x=>['projector','florine','maxine','sam','gm'].includes(x)?x:'projector';
 const roleFromURL=new URLSearchParams(location.search).get('view');
-if(roleFromURL)state.role=safeRole(roleFromURL);
+if(roleFromURL){state.role=safeRole(roleFromURL);if(['florine','maxine','sam','projector','gm'].includes(roleFromURL))state.started=false;}
 state.scene=Math.max(0,Math.min(sceneList.length-1,Number(state.scene)||0));
 let soundOn=false,ctx=null,osc=null;
 const $=id=>document.getElementById(id);
@@ -60,7 +60,7 @@ function playTone(freq=440){if(!soundOn||state.paused)return;let A=window.AudioC
 function currentMoment(role){return moments[role]?.find(x=>x.at===state.scene)||null}
 function makeChoices(role,m,parent){const key=role+':'+m.at,selected=state.answers[key];let head=el('h2',m.title);parent.append(head,el('p',m.text));let image=el('img');image.src=img(m.photo);image.alt='Illustration for '+m.title;image.style.cssText='display:block;width:100%;max-height:410px;object-fit:cover;border:1px solid #6b5b42;border-radius:3px';image.onerror=()=>image.remove();parent.append(image);
 if(selected!==undefined){let reply=el('div','You chose: '+m.choices[selected]+'\n\n'+m.replies[selected],'reply');reply.style.whiteSpace='pre-line';parent.append(reply,el('p','This moment will stay in your story.','note'));}else{let wrap=el('div',undefined,'choices');m.choices.forEach((c,i)=>wrap.append(button(c,()=>{if(state.paused)return;state.answers[key]=i;save();playTone(560);render()},'choice')));parent.append(wrap)}}
-function render(){let role=safeRole(state.role),s=sceneList[state.scene],p=$('mainContent');p.replaceChildren();document.querySelectorAll('[data-role]').forEach(b=>{b.classList.toggle('active',b.dataset.role===role);b.setAttribute('aria-pressed',b.dataset.role===role?'true':'false')});let m=currentMoment(role);$('sceneLabel').textContent='SCENE '+(state.scene+1)+' / '+sceneList.length;$('chapter').textContent=s.chapter;$('sceneTitle').textContent=m&&role!=='projector'&&role!=='gm'?m.title:s.title;$('sceneText').textContent=m&&role!=='projector'&&role!=='gm'?m.text:s.text;$('heroImg').src=img(m&&role!=='projector'&&role!=='gm'?m.photo:s.image);$('panelName').textContent=role==='gm'?'DIRECTOR PREVIEW':role==='projector'?'PROJECTOR STORY':'PRIVATE · '+role.toUpperCase();$('progressText').textContent='Scene '+(state.scene+1)+' of '+sceneList.length;$('bar').style.width=((state.scene+1)/sceneList.length*100)+'%';
+function render(){document.querySelector('.roles').classList.toggle('game-started',Boolean(state.started));let role=safeRole(state.role),s=sceneList[state.scene],p=$('mainContent');p.replaceChildren();document.querySelectorAll('[data-role]').forEach(b=>{b.classList.toggle('active',b.dataset.role===role);b.setAttribute('aria-pressed',b.dataset.role===role?'true':'false')});let m=currentMoment(role);$('sceneLabel').textContent='SCENE '+(state.scene+1)+' / '+sceneList.length;$('chapter').textContent=s.chapter;$('sceneTitle').textContent=m&&role!=='projector'&&role!=='gm'?m.title:s.title;$('sceneText').textContent=m&&role!=='projector'&&role!=='gm'?m.text:s.text;$('heroImg').src=img(m&&role!=='projector'&&role!=='gm'?m.photo:s.image);$('panelName').textContent=role==='gm'?'DIRECTOR PREVIEW':role==='projector'?'PROJECTOR STORY':'PRIVATE · '+role.toUpperCase();$('progressText').textContent='Scene '+(state.scene+1)+' of '+sceneList.length;$('bar').style.width=((state.scene+1)/sceneList.length*100)+'%';
 if(role==='gm'){p.append(el('h2','Director controls'),el('p','This is a spoiler-free standalone demonstration. Scene changes in this browser are not shared with phones. The full game needs a private backend.','muted'));let controls=el('div',undefined,'controls');controls.append(button('← Previous scene',()=>move(-1)),button('Next scene →',()=>move(1),'primary'),button('Reset preview',()=>{if(confirm('Reset preview progress?')){if(state.paused)return;state.scene=0;state.answers={};state.notes={};save();render()}}));p.append(controls);p.append(el('p','Do not treat this preview as a validated mystery game. Puzzle answers and hidden story notes have deliberately not been shipped to this public repository.','note'));return}
 if(role==='projector'){p.append(el('h2','The story unfolds'),el('p',s.text));let gallery=el('div',undefined,'routecards');[['Florine','Florine_After_the_dance'],['Maxine','Maxine_Two_contrasting_glances'],['Sam','Sam_Noticed_in_the_crowd']].forEach(([name,photo])=>{let b=el('button');let im=el('img');im.src=img(photo);im.alt=name+' portrait';b.append(im,el('span',name));b.addEventListener('click',()=>{state.role=name.toLowerCase();save();render()});gallery.append(b)});p.append(gallery,el('p','Use the tabs to explore three distinct personal story previews.','note'));return}
 if(m)makeChoices(role,m,p);else{p.append(el('h2','Your private chapter'),el('p','There is no new private encounter in this scene. You can review your earlier decisions, keep notes, or return to the projector story.'))}
@@ -80,4 +80,53 @@ window.addEventListener('storage',e=>{
   if(e.key!==stateKey||!e.newValue)return;
   try{const latest=JSON.parse(e.newValue);state.paused=Boolean(latest.paused);syncPauseUI()}catch{}
 });
-save();render();syncPauseUI();
+save();render();renderIntro();syncPauseUI();
+
+const opening=[
+{tag:'A LETTER FROM BLACKTHORN',title:'An Invitation',image:'Rainy Gothic Academy',body:'The rain has followed you all the way to Blackthorn Academy. Beyond the iron gates, a thousand illuminated windows shine through the dusk.',speaker:'THE NARRATOR',line:'Some places promise a new beginning. Others remember far too much.',next:'Approach the academy'},
+{tag:'PROLOGUE · THE ARRIVAL',title:'Beyond the Gates',image:'Rainy Arrival at the Gothic Academy',body:'The carriage wheels fall silent against the wet stone. Somewhere inside the old academy, a bell begins to ring.',speaker:'A VOICE NEAR THE DOOR',line:'You must be our new arrivals. Welcome to Blackthorn.',next:'Enter the great hall'},
+{tag:'CHAPTER ONE · SUITE 417',title:'The Three of You',image:'Event_Friends_find_each_other',body:'The familiar sound of laughter reaches you through the corridor. Florine, Maxine and Sam have finally found one another again.',speaker:'THE NARRATOR',line:'Whatever this term brings, it begins with friendship.',next:'Begin your story'}
+];
+function renderIntro(){
+ const overlay=$('introOverlay');if(!overlay)return;
+ overlay.hidden=Boolean(state.started);
+ if(state.started)return;
+ const step=Math.max(0,Math.min(4,Number(state.introStep)||0));
+ const bg=$('introBg'),tag=$('introTag'),title=$('introHeadline'),body=$('introBody'),controls=$('introControls'),bottom=$('introBottom');
+ body.replaceChildren();controls.replaceChildren();
+ const action=(label,callback,cls)=>{const b=button(label,()=>{if(state.paused)return;callback()},cls||'primary');controls.append(b);return b};
+ if(step===0){
+   bg.style.backgroundImage='url("'+img('Rainy Gothic Academy')+'")';
+   tag.textContent='AN INTERACTIVE STORY';title.textContent='The Veiled Moon';
+   body.append(el('p','A new term. Three old friends. And an academy where every conversation might matter.'));
+   action('✦ Enter Blackthorn Academy',()=>{state.introStep=1;save();renderIntro()});
+   action('Continue a saved game',()=>{state.started=true;save();render();renderIntro()},'intro-aux');
+   bottom.textContent='A STORY OF FRIENDSHIP, ROMANCE & MYSTERY';
+ }else if(step===1){
+   bg.style.backgroundImage='url("'+img('Event_Friends_find_each_other')+'")';
+   tag.textContent='CHOOSE YOUR EXPERIENCE';title.textContent='Who are you?';
+   body.append(el('p','Choose your own perspective. Private choices belong to the person holding this device.'));
+   const wrap=el('div',undefined,'intro-personas');
+   [['florine','Florine','Florine_After_the_dance','Sharp wit · fierce loyalty'],['maxine','Maxine','Maxine_Two_contrasting_glances','Bold heart · difficult choices'],['sam','Sam','Sam_Noticed_in_the_crowd','Quiet courage · keen eyes']].forEach(([role,name,photo,desc])=>{
+      const b=el('button');const im=el('img');im.src=img(photo);im.alt=name;b.append(im,el('strong',name),el('small',desc));b.addEventListener('click',()=>{state.role=role;state.introStep=2;state.introChoice=null;save();renderIntro()});wrap.append(b);
+   });body.append(wrap);
+   action('I am using the shared projector',()=>{state.role='projector';state.introStep=2;save();renderIntro()},'secondary');
+   action('Director preview',()=>{state.role='gm';state.introStep=2;save();renderIntro()},'intro-aux');
+   bottom.textContent='YOUR CHOICE WILL SHAPE THE WAY YOU SEE THE STORY';
+ }else if(step===2){
+   const labels={florine:'Florine',maxine:'Maxine',sam:'Sam',projector:'The Shared Story',gm:'Director'};
+   bg.style.backgroundImage='url("'+img(state.role==='florine'?'Florine_After_the_dance':state.role==='maxine'?'Maxine_Two_contrasting_glances':state.role==='sam'?'Sam_Noticed_in_the_crowd':'Event_Friends_find_each_other')+'")';
+   tag.textContent='YOUR CHAPTER BEGINS';title.textContent=labels[state.role]||'Blackthorn';
+   body.append(el('p',state.role==='gm'?'You will control the pace of this spoiler-free preview.':state.role==='projector'?'The shared screen shows the academy and its story. Private decisions should stay on individual phones.':'Your words will matter. Your own private conversations will unfold alongside the shared story.'));
+   action('Begin the prologue',()=>{state.introStep=3;save();renderIntro()});
+   action('← Change character',()=>{state.introStep=1;save();renderIntro()},'intro-aux');
+   bottom.textContent='YOU MAY PAUSE AT ANY TIME';
+ }else{
+   let idx=Math.min(2,Math.max(0,step-3)),o=opening[idx];
+   bg.style.backgroundImage='url("'+img(o.image)+'")';tag.textContent=o.tag;title.textContent=o.title;
+   body.append(el('p',o.body));let box=el('div',undefined,'intro-dialogue');box.append(el('div',o.speaker,'eyebrow'),el('p',o.line,'quote'));body.append(box);
+   action(o.next,()=>{if(idx<2){state.introStep+=1}else{state.started=true;state.scene=0}save();render();renderIntro();window.scrollTo({top:0})});
+   bottom.textContent='CLICK TO CONTINUE · YOUR PROGRESS SAVES AUTOMATICALLY';
+ }
+}
+renderIntro();
