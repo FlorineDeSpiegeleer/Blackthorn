@@ -1,50 +1,26 @@
 # Blackthorn Academy — The Veiled Moon
 
-A premium English-language, dark-academia interactive story featuring three friends, separate personal romantic storylines, and a central mystery.
+## The correct experience
 
-## What is in this public repository
+**Projector:** cinematic story only, full-screen and borderless. The default website no longer has player-app tabs or admin sidebars.
 
-- `index.html` — elegant responsive web interface
-- `style.css` — cinematic dark-academia styling
-- `game.js` — **interactive, spoiler-safe public preview** with:
-  - projector preview and individual Florine / Maxine / Sam tabs;
-  - 12 sample public story beats;
-  - 18 optional one-to-one romantic interactions (5 Florine, 7 Maxine, 6 Sam);
-  - three answers per encounter, responses and browser-local journal;
-  - a preview-only director navigation view;
-  - optional, synthetic UI sound.
-- `nieuwe fotos_SFM/` — images uploaded by the repository owner.
+**Personal phones:** an in-world smartphone interface inspired by the original blackthorn-phones project. Separate Florine, Maxine and Sam screens with Messages, Photos, Camera, Blackthorn, Map, Notes, Calendar and Calls.
 
-## Open the preview
+## Pages links
 
-Open `index.html` in a browser, or enable GitHub Pages for this repository and use the generated URL. **A Pages URL has not yet been confirmed.**
+- Projector: https://florinedespiegeleer.github.io/Blackthorn/
+- Florine: https://florinedespiegeleer.github.io/Blackthorn/phone/?character=florine
+- Maxine: https://florinedespiegeleer.github.io/Blackthorn/phone/?character=maxine
+- Sam: https://florinedespiegeleer.github.io/Blackthorn/phone/?character=sam
 
-### Important: this is NOT the full game
+These URLs require GitHub Pages to be enabled and the new deployment to finish.
 
-This public preview is intentionally **not** the complete Blackthorn murder mystery. It does not include the approved 47-scene / 55-flow private server package, multi-phone synchronization, GM-only canonical evidence, verified solutions to the four research puzzles, or an approved final reveal. The public demo scenes are presentation samples and are not intended to replace the original story canon.
+## Phone preview test
 
-The previous, separately packaged private V15 prototype remains the more complete codebase, but it has unfinished puzzle validation, final approval and end-to-end playtesting. Those are real blockers to advertising a final playable experience.
+Open Blackthorn on the phone's home-screen app grid, then choose **Simulate next chapter**. This releases another set of sample messages for that phone **only**. It is a local preview, not the real mystery unlock process.
 
-## Security
+## Runtime status and safety
 
-This repository is **public**. A hidden story secret committed here is immediately accessible to anyone who can browse GitHub, even without a shared link. Do **not** commit `_canonical_private.json`, server-side secrets, role tokens, original GM-only evidence files or unreleased reveal text.
+GitHub Pages is still a **spoiler-safe front-end preview**, not a synchronized full game. The local V16 prototype has shared state, private role links and server-authoritative pause, but these new phone/projector interfaces are not yet connected to that private server. The complete story, puzzles and finale still need validation.
 
-A real three-phone/projection game should run on a private backend that issues role-bound links and reveals only the current scene and permitted player-specific data.
-
-## Latest status
-
-- Public visual/interactive preview: **uploaded**
-- Owner-supplied photos: **present**
-- Full private-server V15 package: **not uploaded**
-- Complete playable mystery: **not yet validated**
-- Publication of mystery spoilers: **intentionally avoided**
-
-## Review checklist
-
-Check narrative continuity and outfits for ball vs academy days; review the 18 sample romance beats against the approved story; verify image filenames; conduct independent puzzle tests on the *private* package; test 3-phone reconnect, role separation and recovery; approve the separately drafted finale before release.
-
-## Pause and resume (public preview)
-
-Press **Pause** at any time, including during a private romantic choice or director navigation. The pause overlay hides the story, freezes scene navigation and answers, and silences UI audio. Select **Resume** to continue where you left off. Press **P** as a keyboard shortcut. The paused state is stored in browser storage and survives refresh; tabs in the same browser profile receive pause updates.
-
-**Important limitation:** GitHub Pages is a static preview. Different phones do **not** share pause state, choices or timers. The final private-server build must implement server-authoritative pause/resume, freezing countdowns, queueing or rejecting player actions during pause, and broadcasting the state to all devices. This is not yet done.
+For local server setup, see PRIVATE_LAN_GAME_SETUP.md. Do not publish the private V16 ZIP, _canonical_private.json, access tokens, or GM-only sources here.
