@@ -75,4 +75,5 @@
   }
   function close(){closed=true;if(unsub)unsub();}
   window.BlackthornFirebasePreviewSync={enabled,session,connect,publish,close,get status(){return status;}};
+  if(qs.get('backend')==='firebase')window.BlackthornPreviewSync=window.BlackthornFirebasePreviewSync;
 })();
