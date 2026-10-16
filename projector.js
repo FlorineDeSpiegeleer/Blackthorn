@@ -17,31 +17,9 @@ const key='blackthorn_projector_screen_v2';
 let state;try{state=JSON.parse(localStorage.getItem(key)||'{}')}catch{state={}}
 state={scene:0,paused:false,...state};state.scene=Math.min(scenes.length-1,Math.max(0,state.scene|0));
 const $=id=>document.getElementById(id);const save=()=>localStorage.setItem(key,JSON.stringify(state));
-const previewSync=window.BlackthornPreviewSync;
-const synced=Boolean(previewSync&&previewSync.enabled);
-const director=synced&&new URLSearchParams(location.search).get('director')==='1';
-const indicator=document.createElement('div');
-if(synced){
- indicator.setAttribute('role','status');
- indicator.style.cssText='position:fixed;bottom:12px;left:12px;z-index:999;padding:8px 12px;background:#102131e8;color:#f4e7ce;border:1px solid #927d58;border-radius:6px;font:12px system-ui';
- indicator.textContent='Preview sync · connecting';
- document.body.append(indicator);
- if(!director){$('next').hidden=true;$('pause').hidden=true;$('resume').hidden=true;}
-}
-function updateSyncLabel(status){if(synced)indicator.textContent='Preview sync · '+status+(director?' · DIRECTOR':' · WATCHING');}
-function broadcast(){if(synced&&director)previewSync.publish(state.scene,state.paused);}
-
-const photo=x=>'nieuwe%20fotos_SFM/'+encodeURIComponent(x+'.png');
 function render(){const s=scenes[state.scene];$('chapter').textContent=s[0];$('title').textContent=s[1];$('words').textContent=s[2];$('image').style.backgroundImage='url("'+photo(s[3])+'")';$('next').textContent=state.scene===scenes.length-1?'Restart preview ↻':state.scene===0?'Enter Blackthorn Academy →':'Continue →';$('paused').hidden=!state.paused;}
-function advance(){if((synced&&!director)||state.paused)return;state.scene=(state.scene+1)%scenes.length;save();render();broadcast()}
-function pause(v){if(synced&&!director)return;state.paused=Boolean(v);save();render();broadcast()}
+function advance(){if(state.paused)return;state.scene=(state.scene+1)%scenes.length;save();render()}
+function pause(v){state.paused=Boolean(v);save();render()}
 $('next').onclick=advance;$('pause').onclick=()=>pause(true);$('resume').onclick=()=>pause(false);
 document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();advance()}else if(e.key.toLowerCase()==='p'){pause(!state.paused)}});
 save();render();
-if(synced){
- previewSync.connect({
-   onState:remote=>{if(director)return;state.scene=remote.scene;state.paused=remote.paused;save();render();},
-   onStatus:updateSyncLabel
- });
- if(director)broadcast();
-}
