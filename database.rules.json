@@ -7,7 +7,7 @@
         "public": {
           ".read": "auth != null && $session.matches(/^[A-Za-z0-9_-]{16,64}$/)",
           ".write": "auth != null && auth.uid === 'REPLACE_WITH_FIREBASE_DIRECTOR_UID' && $session.matches(/^[A-Za-z0-9_-]{16,64}$/)",
-          ".validate": "newData.hasChildren(['scene','paused','version','updatedAt']) && newData.childrenCount() === 4",
+          ".validate": "newData.hasChildren(['scene','paused','version','updatedAt'])",
           "scene": {
             ".validate": "newData.isNumber() && newData.val() >= 0 && newData.val() <= 11 && newData.val() % 1 == 0"
           },
