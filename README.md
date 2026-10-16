@@ -15,6 +15,10 @@
 
 These URLs require GitHub Pages to be enabled and the new deployment to finish.
 
+## Firebase realtime preview (without Railway)
+
+An optional authenticated **Firebase Realtime Database** rehearsal backend has been added on `main`. See [FIREBASE_SETUP.md](FIREBASE_SETUP.md) for configuration, access rules, Director login and five-device test links. **It is not enabled until a Firebase project is configured**, and it does not yet host the complete confidential V18 mystery. The private story stays outside this public repository.
+
 ## Phone preview test
 
 Open Blackthorn on the phone's home-screen app grid, then choose **Simulate next chapter**. This releases another set of sample messages for that phone **only**. It is a local preview, not the real mystery unlock process.
