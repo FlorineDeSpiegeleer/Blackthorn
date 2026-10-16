@@ -16,6 +16,11 @@ const photo=name=>'../nieuwe%20fotos_SFM/'+encodeURIComponent(name+'.png');
 const memory=()=>{try{return JSON.parse(localStorage.getItem(KEY+role)||'{}')}catch{return {}}};
 let state={stage:0,view:'home',thread:null,answers:{},notes:'',...memory()};
 const screen=document.getElementById('screen');
+const previewSync=window.BlackthornPreviewSync;
+const synced=Boolean(previewSync&&previewSync.enabled);
+let syncStatus=synced?'connecting':'local preview';
+let remotelyPaused=false;
+
 const node=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n};
 const save=()=>localStorage.setItem(KEY+role,JSON.stringify(state));
 const go=(view,thread=null)=>{state.view=view;state.thread=thread;save();render();scrollTo(0,0)};
@@ -64,12 +69,35 @@ function drawPhotos(w){header(w,'Photos');const content=node('div',undefined,'co
 function drawPhoto(w){header(w,'Photo');let content=node('div',undefined,'content');content.append(img(state.thread,'largephoto'));w.append(content);nav(w)}
 function drawNotes(w){header(w,'Notes');const content=node('div',undefined,'content');content.append(node('p','Private notes — saved on this device only.','notice'));const a=node('textarea',undefined,'notearea');a.placeholder='Write down what you noticed…';a.value=state.notes||'';a.addEventListener('input',()=>{state.notes=a.value;save()});content.append(a);w.append(content);nav(w)}
 function drawOther(w){const view=state.view;header(w,({blackthorn:'Blackthorn',map:'Academy Map',calendar:'Calendar',calls:'Calls',camera:'Camera'}[view]||view));const content=node('div',undefined,'content');
-if(view==='blackthorn'){const card=node('div',undefined,'card');card.append(node('h3','Personal Academy Portal'),node('p','Preview chapter: '+STAGES[state.stage]+'. New messages appear in Messages as chapters are released.'));content.append(card);content.append(node('p','Preview only: this button simulates a new chapter on this phone. The real game will unlock messages automatically from the private server.','notice'));content.append(uiButton('Simulate next chapter →',()=>{state.stage=(state.stage+1)%STAGES.length;save();go('messages')},'plainbutton'))}
+if(view==='blackthorn'){const card=node('div',undefined,'card');card.append(node('h3','Personal Academy Portal'),node('p','Preview chapter: '+STAGES[state.stage]+'. New messages appear in Messages as chapters are released.'));content.append(card);content.append(node('p',synced?'Shared preview only: chapter stages follow the projection. This is not the private V18 mystery server.':'Preview only: this button simulates a new chapter on this phone. The real game will unlock messages automatically from the private server.','notice'));if(!synced)content.append(uiButton('Simulate next chapter →',()=>{state.stage=(state.stage+1)%STAGES.length;save();go('messages')},'plainbutton'));else content.append(node('p','Chapter progress is controlled by the shared preview director.','notice'))}
 if(view==='map'){const card=node('div',undefined,'card');card.append(node('h3','Academy grounds'),node('p','Great Hall · Library · Courtyard · Observatory'));content.append(card)}
 if(view==='calendar'){let items=[['Arrival','Check-in and settle in'],['Founders’ Evening','Formal academy gathering'],['Classes','Academic timetable']];items.filter((x,i)=>i<=state.stage).forEach(([title,description])=>{let card=node('div',undefined,'card');card.append(node('h3',title),node('p',description));content.append(card)})}
 if(view==='calls'){content.append(node('p','No recent calls.','blank'))}
 if(view==='camera'){content.append(node('p','Camera preview is not available in this public version.','notice'))}
 w.append(content);nav(w)}
 function chooser(){const w=wrap(),c=node('div',undefined,'introphone');c.append(node('p','BLACKTHORN ACADEMY'),node('h1','Your private phone'),node('p','Choose the character who will use this device. Every player should use a separate phone.'));VALID.forEach(r=>c.append(uiButton(r[0].toUpperCase()+r.slice(1),()=>{const url=new URL(location.href);url.searchParams.set('character',r);location.href=url.href})));w.append(c)}
-function render(){if(!role){chooser();return}document.body.dataset.person=role;const w=wrap();if(state.view==='home')drawHome(w);else if(state.view==='messages')listMessages(w);else if(state.view==='thread')drawThread(w);else if(state.view==='photos')drawPhotos(w);else if(state.view==='photo')drawPhoto(w);else if(state.view==='notes')drawNotes(w);else drawOther(w)}
+function render(){if(!role){chooser();return}document.body.dataset.person=role;const w=wrap();if(state.view==='home')drawHome(w);else if(state.view==='messages')listMessages(w);else if(state.view==='thread')drawThread(w);else if(state.view==='photos')drawPhotos(w);else if(state.view==='photo')drawPhoto(w);else if(state.view==='notes')drawNotes(w);else drawOther(w);
+ if(synced){
+   const badge=node('div','PREVIEW SYNC · '+syncStatus.toUpperCase(),'preview-sync-badge');
+   badge.style.cssText='position:fixed;top:8px;right:8px;z-index:100;padding:5px 8px;border-radius:5px;background:#102131e8;color:#fff0d8;font:10px system-ui;border:1px solid #927d58;pointer-events:none';
+   w.append(badge);
+   if(remotelyPaused){
+     const overlay=node('div',undefined,'preview-paused');
+     overlay.style.cssText='position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;background:#07111af2;color:#fff3dd;text-align:center;font:20px Georgia,serif;padding:2rem';
+     overlay.append(node('p','The story is paused by the Director.'));
+     w.append(overlay);
+   }
+ }
+}
 render();
+if(synced){
+ previewSync.connect({
+   onState:remote=>{
+     const stage=Math.min(STAGES.length-1,Math.floor(remote.scene*STAGES.length/12));
+     const changed=state.stage!==stage||remotelyPaused!==remote.paused;
+     state.stage=stage;remotelyPaused=remote.paused;
+     if(changed){save();render();}
+   },
+   onStatus:status=>{syncStatus=status;render();}
+ });
+}
