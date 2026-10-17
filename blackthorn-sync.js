@@ -12,7 +12,7 @@
  const topic='blackthorn-game-'+session;
  const root=enabled?'https://ntfy.sh/'+topic:'';
  const instance=Math.random().toString(36).slice(2)+Date.now().toString(36);
- const listeners=new Set(), statusListeners=new Set();
+ const listeners=new Set(), statusListeners=new Set(), choiceListeners=new Set();
  let lastRevision=0, connected=false, es=null, current=null, cooldown=0;
  const storageKey='blackthorn_remote_'+session;
  try {const saved=JSON.parse(sessionStorage.getItem(storageKey)||'null');if(saved&&Number.isInteger(saved.revision)){lastRevision=saved.revision;current=saved;}}catch(_){}
@@ -37,7 +37,9 @@
    try{
     const data=JSON.parse(event.data);
     if(data.event!=='message'||typeof data.message!=='string')return;
-    accept(JSON.parse(data.message));
+    const message=JSON.parse(data.message);
+    if(message.type==='choice'&&message.protocol===1){choiceListeners.forEach(cb=>cb(message));return;}
+    accept(message);
    }catch(_){}
   };
  }
@@ -65,5 +67,5 @@
  }
  function close(){if(es){es.close();es=null;}}
  window.BlackthornSync={enabled,session,connect,publish,publishChoice,close,subscribe(cb){listeners.add(cb);if(current)cb(current);return()=>listeners.delete(cb);},
-  onStatus(cb){statusListeners.add(cb);return()=>statusListeners.delete(cb);},get current(){return current;},get connected(){return connected;}};
+  onStatus(cb){statusListeners.add(cb);return()=>statusListeners.delete(cb);},onChoice(cb){choiceListeners.add(cb);return()=>choiceListeners.delete(cb);},get current(){return current;},get connected(){return connected;}};
 })();
