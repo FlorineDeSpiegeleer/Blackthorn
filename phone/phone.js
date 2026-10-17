@@ -16,6 +16,11 @@ const photo=name=>'../nieuwe%20fotos_SFM/'+encodeURIComponent(name+'.png');
 const memory=()=>{try{return JSON.parse(localStorage.getItem(KEY+role)||'{}')}catch{return {}}};
 let state={stage:0,view:'home',thread:null,answers:{},notes:'',...memory()};
 const screen=document.getElementById('screen');
+const sync=window.BlackthornSync;
+const live=!!sync?.enabled;
+let remotelyPaused=false;
+let status='connecting';
+
 const node=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n};
 const save=()=>localStorage.setItem(KEY+role,JSON.stringify(state));
 const go=(view,thread=null)=>{state.view=view;state.thread=thread;save();render();scrollTo(0,0)};
@@ -59,17 +64,37 @@ sam:[
 return [...shared,...personal[role]].filter(x=>x.at<=state.stage).map((x,i)=>({...x,id:x.thread+'-'+x.at+'-'+i}))}
 function listMessages(w){header(w,'Messages');const all=visibleEntries(),threads=[...new Set(all.map(x=>x.thread))];const cont=node('div');threads.forEach(thread=>{let entries=all.filter(x=>x.thread===thread),last=entries[entries.length-1];let b=node('button',undefined,'thread');let av=node('div',thread.slice(0,1),'avatar'),detail=node('div');detail.append(node('strong',thread),node('p',last.text));b.append(av,detail);b.onclick=()=>go('thread',thread);cont.append(b)});if(!threads.length)cont.append(node('p','No new messages.','blank'));w.append(cont);nav(w)}
 function drawThread(w){const thread=state.thread||'Suite 417';header(w,thread);const entries=visibleEntries().filter(x=>x.thread===thread);let messages=node('div',undefined,'messages');entries.forEach(entry=>{let box=node('div',undefined,'msg');box.append(node('div',entry.from+' · Received','who'),node('div',entry.text));messages.append(box);if(state.answers[entry.id]!==undefined){let chosen=state.answers[entry.id];let mine=node('div',entry.choices[chosen],'msg mine');messages.append(mine);messages.append(node('div',entry.responses[chosen],'msg'))}});w.append(messages);
-const pending=entries.filter(x=>x.choices&&state.answers[x.id]===undefined);if(pending.length){let current=pending[0],options=node('div',undefined,'replychoices');options.append(node('p','Choose your reply:','notice'));current.choices.forEach((c,i)=>options.append(uiButton(c,()=>{state.answers[current.id]=i;save();render()},'plainbutton')));w.append(options)}nav(w)}
+const pending=entries.filter(x=>x.choices&&state.answers[x.id]===undefined);if(pending.length){let current=pending[0],options=node('div',undefined,'replychoices');options.append(node('p','Choose your reply:','notice'));current.choices.forEach((c,i)=>options.append(uiButton(c,()=>{state.answers[current.id]=i;save();if(live)sync.publishChoice(role,current.id,i);render()},'plainbutton')));w.append(options)}nav(w)}
 function drawPhotos(w){header(w,'Photos');const content=node('div',undefined,'content');const grid=node('div',undefined,'photogrid');photos[role].forEach(photoName=>{const a=img(photoName);a.addEventListener('click',()=>go('photo',photoName));grid.append(a)});content.append(grid);w.append(content);nav(w)}
 function drawPhoto(w){header(w,'Photo');let content=node('div',undefined,'content');content.append(img(state.thread,'largephoto'));w.append(content);nav(w)}
 function drawNotes(w){header(w,'Notes');const content=node('div',undefined,'content');content.append(node('p','Private notes — saved on this device only.','notice'));const a=node('textarea',undefined,'notearea');a.placeholder='Write down what you noticed…';a.value=state.notes||'';a.addEventListener('input',()=>{state.notes=a.value;save()});content.append(a);w.append(content);nav(w)}
 function drawOther(w){const view=state.view;header(w,({blackthorn:'Blackthorn',map:'Academy Map',calendar:'Calendar',calls:'Calls',camera:'Camera'}[view]||view));const content=node('div',undefined,'content');
-if(view==='blackthorn'){const card=node('div',undefined,'card');card.append(node('h3','Personal Academy Portal'),node('p','Preview chapter: '+STAGES[state.stage]+'. New messages appear in Messages as chapters are released.'));content.append(card);content.append(node('p','Preview only: this button simulates a new chapter on this phone. The real game will unlock messages automatically from the private server.','notice'));content.append(uiButton('Simulate next chapter →',()=>{state.stage=(state.stage+1)%STAGES.length;save();go('messages')},'plainbutton'))}
+if(view==='blackthorn'){const card=node('div',undefined,'card');card.append(node('h3','Personal Academy Portal'),node('p','Preview chapter: '+STAGES[state.stage]+'. New messages appear in Messages as chapters are released.'));content.append(card);content.append(node('p','Preview only: this button simulates a new chapter on this phone. The real game will unlock messages automatically from the private server.','notice'));if(!live)content.append(uiButton('Simulate next chapter →',()=>{state.stage=(state.stage+1)%STAGES.length;save();go('messages')},'plainbutton'));else content.append(node('p','Director controls the shared chapter.','notice'))}
 if(view==='map'){const card=node('div',undefined,'card');card.append(node('h3','Academy grounds'),node('p','Great Hall · Library · Courtyard · Observatory'));content.append(card)}
 if(view==='calendar'){let items=[['Arrival','Check-in and settle in'],['Founders’ Evening','Formal academy gathering'],['Classes','Academic timetable']];items.filter((x,i)=>i<=state.stage).forEach(([title,description])=>{let card=node('div',undefined,'card');card.append(node('h3',title),node('p',description));content.append(card)})}
 if(view==='calls'){content.append(node('p','No recent calls.','blank'))}
 if(view==='camera'){content.append(node('p','Camera preview is not available in this public version.','notice'))}
 w.append(content);nav(w)}
 function chooser(){const w=wrap(),c=node('div',undefined,'introphone');c.append(node('p','BLACKTHORN ACADEMY'),node('h1','Your private phone'),node('p','Choose the character who will use this device. Every player should use a separate phone.'));VALID.forEach(r=>c.append(uiButton(r[0].toUpperCase()+r.slice(1),()=>{const url=new URL(location.href);url.searchParams.set('character',r);location.href=url.href})));w.append(c)}
-function render(){if(!role){chooser();return}document.body.dataset.person=role;const w=wrap();if(state.view==='home')drawHome(w);else if(state.view==='messages')listMessages(w);else if(state.view==='thread')drawThread(w);else if(state.view==='photos')drawPhotos(w);else if(state.view==='photo')drawPhoto(w);else if(state.view==='notes')drawNotes(w);else drawOther(w)}
+function render(){if(!role){chooser();return}document.body.dataset.person=role;const w=wrap();if(state.view==='home')drawHome(w);else if(state.view==='messages')listMessages(w);else if(state.view==='thread')drawThread(w);else if(state.view==='photos')drawPhotos(w);else if(state.view==='photo')drawPhoto(w);else if(state.view==='notes')drawNotes(w);else drawOther(w);
+ if(live){
+  const badge=node('div','LIVE · '+status.toUpperCase(),'live-indicator');
+  badge.style.cssText='position:fixed;z-index:500;right:6px;top:6px;background:#102030e8;color:#eadcbb;border:1px solid #9f875b;padding:4px 6px;font:10px system-ui;pointer-events:none';
+  w.append(badge);
+  if(remotelyPaused){
+    const overlay=node('div',undefined,'game-pause');
+    overlay.style.cssText='position:fixed;inset:0;z-index:999;background:#0b1724f0;color:#f7e8c8;display:grid;place-items:center;font:22px Georgia,serif;text-align:center';
+    overlay.append(node('p','The story is paused.'));w.append(overlay);
+  }
+ }
+}
 render();
+if(live){
+ sync.subscribe(remote=>{
+  const stage=Math.min(STAGES.length-1,Math.floor(remote.scene*STAGES.length/12));
+  if(state.stage!==stage||remotelyPaused!==remote.paused){state.stage=stage;remotelyPaused=remote.paused;save();render();}
+ });
+ sync.onStatus(next=>{status=next;render();});
+ sync.connect();
+}
+
