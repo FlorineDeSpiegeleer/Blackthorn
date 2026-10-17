@@ -19,13 +19,31 @@ These URLs require GitHub Pages to be enabled and the new deployment to finish.
 
 No Firebase, Railway or hosted game server is needed. Download the existing private V18 game archive separately, place it beside `START_BLACKTHORN_WINDOWS.bat`, and double-click the starter on a Windows laptop with Python 3.10+. The laptop will act as the private game server for three phones plus a projector. [Full Windows setup instructions](PRIVATE_LAN_GAME_SETUP.md). The attractive public Pages previews have **not yet been integrated into the confidential V18 server**; a full five-device playtest is still required.
 
+## One-night GitHub Pages + ntfy multiplayer rehearsal
+
+The public projector and three phone previews now support synchronized **scene position, pause and phone choice receipts** via the same ntfy.sh method used by DigitalWorkstation. No Python, Firebase or Railway is necessary to run this preview.
+
+Choose a new random session word, at least 16 characters, and use the **identical** code in each URL:
+
+- **Director:** `https://florinedespiegeleer.github.io/Blackthorn/?session=YOUR_RANDOM_SESSION&director=1`
+- **Beamer (viewer):** `https://florinedespiegeleer.github.io/Blackthorn/?session=YOUR_RANDOM_SESSION`
+- **Florine:** `https://florinedespiegeleer.github.io/Blackthorn/phone/?character=florine&session=YOUR_RANDOM_SESSION`
+- **Maxine:** `https://florinedespiegeleer.github.io/Blackthorn/phone/?character=maxine&session=YOUR_RANDOM_SESSION`
+- **Sam:** `https://florinedespiegeleer.github.io/Blackthorn/phone/?character=sam&session=YOUR_RANDOM_SESSION`
+
+The Director's page advances/pauses the shared scene. Other devices subscribe to the current state, including reconnects. Character-specific **preview** replies are published as compact `role + choiceId + option` events and appear in the Director's small event panel.
+
+This is a **functional transport integration, not yet the complete V18 game**. The public page still has 12 spoiler-safe projection scenes and sample phone messages. The 47-scene private canon, hidden clues, full answer validation, and finale are **not migrated** from the confidential V18 archive yet. **Do not use this as a complete playtest.**
+
+ntfy channels and the `director=1` flag do not provide real authentication. For this one-off private group the user accepts that trade-off; choose a non-obvious session code and share links only with participants. No secret story content is sent over ntfy events by the current integration.
+
 ## Phone preview test
 
 Open Blackthorn on the phone's home-screen app grid, then choose **Simulate next chapter**. This releases another set of sample messages for that phone **only**. It is a local preview, not the real mystery unlock process.
 
-## GitHub-only scope
+## GitHub Pages hosting
 
-The GitHub Pages site is a **standalone, spoiler-safe preview**. It requires no Firebase, Railway, ntfy or other third-party service. It retains local browser progress and independent character previews. **GitHub Pages alone cannot securely synchronize confidential, role-restricted story decisions in real time across unrelated devices.** The private V18 story code remains private and has not been published to Pages. Shared real-time play requires a trusted running process; the optional Windows local launcher starts the separate private V18 Python server for exactly this purpose.
+The GitHub Pages site is a **spoiler-safe preview**. Its opt-in live synchronization uses the external ntfy.sh message service; there is no separate server to install. It retains local browser progress and independent character previews. **A bare GitHub Pages site cannot synchronize by itself; the ntfy integration above adds best-effort live event delivery for this one-time game.** The private V18 story code remains private and has not been published to Pages. Shared real-time play requires a trusted running process; the optional Windows local launcher starts the separate private V18 Python server for exactly this purpose.
 
 ## Runtime status and safety
 
