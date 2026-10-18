@@ -42,13 +42,13 @@ const currentScene=()=>story[state.scene];
 const plainText=value=>typeof value==='string'?value:Array.isArray(value)?value.join(' '):String(value??'');
 function reactionDialogue(scene){
  const raw=String(scene?.npc_and_shared_reactions||'');
- const re=/([A-Z][A-Z .-]{2,36}):\\s*[“"]([^”"]{5,700})[”"]/g;
+ const re=/([A-Z][A-Z .-]{2,36}):\s*[“"]([^”"]{5,700})[”"]/g;
  const lines=[...raw.matchAll(re)].map(m=>({name:m[1].trim(),text:m[2]}));
  // Only literal scripted speech can become portrait dialogue. Never generate lines.
  return lines.length>=2?lines.slice(0,2):[];
 }
 function silhouette(name){
- const initials=String(name||'✦').split(/\\s+/).map(x=>x[0]||'').slice(0,2).join('');
+ const initials=String(name||'✦').split(/\s+/).map(x=>x[0]||'').slice(0,2).join('');
  const svg='<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><defs><radialGradient id="g"><stop stop-color="#334456"/><stop offset="1" stop-color="#101a2a"/></radialGradient></defs><circle cx="128" cy="128" r="128" fill="url(#g)"/><circle cx="128" cy="128" r="108" fill="none" stroke="#bd985e" stroke-width="2"/><text x="128" y="153" font-family="Georgia" font-size="64" text-anchor="middle" fill="#f2d8a5">'+initials.replace(/[&<>"]/g,'')+'</text></svg>';
  return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
 }
