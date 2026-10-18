@@ -41,23 +41,42 @@ const sceneInfo=s=>{
  if(Array.isArray(s))return {chapter:s[0],title:s[1],body:s[2],image:s[3],kind:'narration'};
  return {chapter:s.kicker||s.stage||'BLACKTHORN ACADEMY',title:s.title||'',body:s.player_body||s.text||'',image:s.image||s.background||'',kind:s.type||'narration',lines:s.dialogue||[],display_location:s.display_location||''};
 };
-function applyImage(name){
- const filename=name||'Rainy Gothic Academy';
- const location=sceneInfo(currentScene()).display_location||'';
- const mapped=Object.entries(pictureManifest.locations||{}).find(([key])=>location.toUpperCase().includes(key));
- const preferred=mapped?.[1]||'';
- const preload=new Image();
- if(preferred){
-  preload.onload=()=>{$('image').style.backgroundImage='linear-gradient(90deg,#090e18b0,#10192a33),url("'+preferred.replaceAll('"','%22')+'")'};
-  preload.onerror=()=>{$('image').style.backgroundImage='linear-gradient(90deg,#090e18b0,#10192a33),url("'+photo(filename)+'")'};
-  preload.src=preferred;
- }else $('image').style.backgroundImage='linear-gradient(90deg,#090e18b0,#10192a33),url("'+photo(filename)+'")';
+let imageRequest=0;
+const existingSceneFallback=name=>'nieuwe%20fotos_SFM/'+encodeURIComponent(name+'.png');
+function imageCandidates(scene,menu=false){
+ const location=String(scene?.display_location||'').toUpperCase();
+ const id=String(scene?.scene_id||'');
+ const manifest=pictureManifest;
+ const sceneSpecific=menu?[]:(manifest.sceneImages?.[id]||[]);
+ const locationMatch=menu?['BLACKTHORN ACADEMY',manifest.locations?.['BLACKTHORN ACADEMY']]:
+  Object.entries(manifest.locations||{}).find(([key])=>location.includes(key));
+ const locationImages=locationMatch?.[1]||[];
+ const fallback=existingSceneFallback(menu?'Rainy Gothic Academy':(scene?.image||'Rainy Gothic Academy'));
+ return [...new Set([...sceneSpecific,...locationImages,fallback,
+  existingSceneFallback('Rainy Gothic Academy')])];
+}
+function applyImage(_name,menu=false){
+ const request=++imageRequest;
+ const candidates=imageCandidates(menu?null:currentScene(),menu);
+ const element=$('image');
+ const attempt=index=>{
+  if(index>=candidates.length||request!==imageRequest)return;
+  const src=candidates[index];
+  const probe=new Image();
+  probe.onload=()=>{
+   if(request===imageRequest)
+    element.style.backgroundImage='linear-gradient(90deg,#090e18b0,#10192a33),url("'+src.replaceAll('"','%22')+'")';
+  };
+  probe.onerror=()=>attempt(index+1);
+  probe.src=src;
+ };
+ attempt(0);
 }
 function setMenu(open){
  $('menu').hidden=!open;$('game').hidden=open;
  $('pause').hidden=open||live&&!director;
  $('menuBack').hidden=open||live&&!director;
- if(open)applyImage('Rainy Gothic Academy');
+ if(open)applyImage('Rainy Gothic Academy',true);
  else renderScene();
 }
 function renderScene(){
