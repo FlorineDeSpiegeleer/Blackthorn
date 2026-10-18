@@ -1,3 +1,12 @@
+# Important correction: English narrative and story completeness
+
+**18 October 2026:** The first public 47-scene import incorrectly displayed Dutch production notes and fragmentary scene summaries as if they were final game dialogue. That release was NOT a complete English story.
+
+The separate English localizations `story-english.js` (47 scenes) and `phone-english.js` (55 flows) are now loaded by the projector, phones and Director Desk. All original Dutch canonical fields are preserved as internal source data; the English copy contains connective narrative, not invented evidence or hidden solution facts. GitHub QA now requires a translation record for every scene and phone flow.
+
+**Still NOT fully playable as a finished narrative:** the V18 source is an outline/script, with missing fully written conversations and evidence interaction and a GM finale placeholder in scene S27. The new English text is a bridge for readability and follows the known events, not a complete replacement for final canonical mystery content. This needs authoring and a full 3-player playtest before claiming an end-to-end polished game. Private final consequence placeholders remain unexpanded.
+
+---
 # Blackthorn Academy — development QA status (18 October 2026)
 
 **Spoiler-free report.** The original V18 mystery content is intentionally not recited here.
