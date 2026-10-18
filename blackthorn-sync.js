@@ -12,7 +12,7 @@
  const topic='blackthorn-game-'+session;
  const root=enabled?'https://ntfy.sh/'+topic:'';
  const instance=Math.random().toString(36).slice(2)+Date.now().toString(36);
- const listeners=new Set(), statusListeners=new Set(), choiceListeners=new Set(), readyListeners=new Set(), helloListeners=new Set();
+ const listeners=new Set(), statusListeners=new Set(), choiceListeners=new Set(), readyListeners=new Set(), helloListeners=new Set(), submissionListeners=new Set(), approvalListeners=new Set();
  let lastRevision=0, connected=false, es=null, current=null, cooldown=0;
  const storageKey='blackthorn_remote_'+session;
  try {const saved=JSON.parse(sessionStorage.getItem(storageKey)||'null');if(saved&&Number.isInteger(saved.revision)){lastRevision=saved.revision;current=saved;}}catch(_){}
@@ -41,6 +41,8 @@
     if(message.protocol!==1)return;
     if(message.type==='choice'){choiceListeners.forEach(cb=>cb(message));return;}
     if(message.type==='ready'){readyListeners.forEach(cb=>cb(message));return;}
+    if(message.type==='submission'){submissionListeners.forEach(cb=>cb(message));return;}
+    if(message.type==='approval'){approvalListeners.forEach(cb=>cb(message));return;}
     if(message.type==='hello'){helloListeners.forEach(cb=>cb(message));return;}
     accept(message);
    }catch(_){}
@@ -72,11 +74,21 @@
   if(!['florine','maxine','sam'].includes(role)||!Number.isInteger(scene)||scene<0||scene>=100)return false;
   return send({protocol:1,type:'ready',role,scene,revision:Date.now()*1000,source:instance});
  }
+ async function publishSubmission(role,puzzle,text){
+  if(!['florine','maxine','sam'].includes(role)||!/^P[1-4]$/.test(puzzle))return false;
+  const answer=String(text||'').trim().slice(0,1200);
+  if(!answer)return false;
+  return send({protocol:1,type:'submission',role,puzzle,text:answer,revision:Date.now()*1000,source:instance});
+ }
+ async function publishApproval(puzzle,approved){
+  if(!/^P[1-4]$/.test(puzzle))return false;
+  return send({protocol:1,type:'approval',puzzle,approved:!!approved,revision:Date.now()*1000,source:instance});
+ }
  async function askState(){
   if(!enabled)return false;
   return send({protocol:1,type:'hello',revision:Date.now()*1000,source:instance});
  }
  function close(){if(es){es.close();es=null;}}
- window.BlackthornSync={enabled,session,connect,publish,publishChoice,publishReady,askState,close,subscribe(cb){listeners.add(cb);if(current)cb(current);return()=>listeners.delete(cb);},
-  onStatus(cb){statusListeners.add(cb);return()=>statusListeners.delete(cb);},onChoice(cb){choiceListeners.add(cb);return()=>choiceListeners.delete(cb);},onReady(cb){readyListeners.add(cb);return()=>readyListeners.delete(cb);},onHello(cb){helloListeners.add(cb);return()=>helloListeners.delete(cb);},get current(){return current;},get connected(){return connected;}};
+ window.BlackthornSync={enabled,session,connect,publish,publishChoice,publishReady,publishSubmission,publishApproval,askState,close,subscribe(cb){listeners.add(cb);if(current)cb(current);return()=>listeners.delete(cb);},
+  onStatus(cb){statusListeners.add(cb);return()=>statusListeners.delete(cb);},onChoice(cb){choiceListeners.add(cb);return()=>choiceListeners.delete(cb);},onReady(cb){readyListeners.add(cb);return()=>readyListeners.delete(cb);},onHello(cb){helloListeners.add(cb);return()=>helloListeners.delete(cb);},onSubmission(cb){submissionListeners.add(cb);return()=>submissionListeners.delete(cb);},onApproval(cb){approvalListeners.add(cb);return()=>approvalListeners.delete(cb);},get current(){return current;},get connected(){return connected;}};
 })();
