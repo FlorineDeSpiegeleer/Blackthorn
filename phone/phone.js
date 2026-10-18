@@ -36,6 +36,15 @@ const intro=node('div',undefined,'identity');intro.append(node('div',time(),'clo
 const grid=node('div',undefined,'grid');const apps=[['✉','Messages','messages'],['▧','Photos','photos'],['▣','Camera','camera'],['✦','Blackthorn','blackthorn'],['⌖','Map','map'],['✎','Notes','notes'],['▦','Calendar','calendar'],['☎','Calls','calls']];
 apps.forEach(([ico,label,view])=>{const b=node('button',undefined,'appbutton');const symbol=node('span',ico,'appicon');b.append(symbol,node('span',label));if(view==='messages'&&state.stage>0){b.append(node('span','●','bubble'))}b.onclick=()=>go(view);grid.append(b)});
 h.append(grid);const dock=node('div',undefined,'dock');[['✉','messages'],['☎','calls'],['✎','notes']].forEach(([ico,v])=>dock.append(uiButton(ico,()=>go(v),'appicon')));h.append(dock);w.append(h)}
+function conditionSatisfied(expression){
+ const expr=String(expression||'').trim();
+ if(!expr)return true;
+ const savedFlags=state.flags||{};
+ const simple=expr.match(/^([a-zA-Z_][\w.]*)\s*=\s*([\w.-]+)$/);
+ if(simple)return String(savedFlags[simple[1]]??'')===simple[2];
+ // Do not auto-unlock clues with unrecognized conditions.
+ return false;
+}
 function canonicalEntries(){
  const source=window.BlackthornStory;
  if(!source || !Array.isArray(source.scenes) || !Array.isArray(source.flows))return null;
@@ -50,6 +59,7 @@ function canonicalEntries(){
    if(seen.has(ref))continue;seen.add(ref);
    const f=flowById.get(ref);
    if(!f || ![role.toLowerCase(),'all'].includes(String(f.character||'').toLowerCase()))continue;
+   if(!conditionSatisfied(f.condition))continue;
    const choices=[f.intent_1,f.intent_2,f.intent_3].map(x=>String(x||'').trim()).filter(Boolean);
    const responses=[f.reaction_1,f.reaction_2,f.reaction_3].slice(0,choices.length).map(x=>String(x||''));
    result.push({
