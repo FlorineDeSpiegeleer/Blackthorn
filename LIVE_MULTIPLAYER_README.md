@@ -1,29 +1,28 @@
-# Blackthorn — GitHub-only edition
+# Blackthorn — one-night multiplayer, only GitHub Pages + ntfy.sh
 
-The public [Blackthorn website](https://florinedespiegeleer.github.io/Blackthorn/) is served entirely by GitHub Pages. It does not connect to Firebase, Railway, ntfy or any other service.
+This is the chosen setup for **three players in the same room with one Windows laptop and a projector**. No Firebase, Railway, or Python server needs to be configured. The website and code live on GitHub; ntfy.sh relays the cross-device events, exactly as in DigitalWorkstation.
 
-## What currently works
+## Start the game
 
-- Cinematic projector preview and separate Florine, Maxine and Sam phone previews.
-- Local scene navigation and local phone notes/messages.
-- Local progress persistence across refreshes in the same browser.
-- Spoiler-safe previews; the confidential story stays outside the public repo.
+1. Open **https://florinedespiegeleer.github.io/Blackthorn/director.html** on the Windows laptop. A new random game session is generated automatically.
+2. The Director Desk displays five links: Director, Beamer, Florine, Maxine, Sam.
+3. Plug in the projector and use **Win + P → Extend**. Open the **Beamer** link on the extended/projected display and press F11.
+4. Let each player open her own Florine/Maxine/Sam link on the phone. The original Blackthorn Phones visual interface remains unchanged.
+5. In the Director Desk choose **New Game**. The beamer and phones follow.
+6. The Director controls scene changes, previous, pause and resume. Phone choices go to the Director event list; a **Ready** button inside each character's Blackthorn app confirms readiness.
+7. At the four investigation checkpoints, the phones can send their response to the Director, who can **approve** the checkpoint before advancing.
+8. In case of reconnection, phones and the beamer request the current scene again. Character choices and notes are saved locally under the active session code.
 
-## What GitHub Pages cannot do alone
+## Images
 
-GitHub Pages provides static HTML, CSS, JavaScript and images, not a running, trusted game server. Browsers on different devices do not share localStorage. A static GitHub-only page therefore cannot securely perform all of these simultaneously: instant authoritative cross-device state, confidential role-only message delivery, protected puzzle checking, and a hidden canonical finale.
+The current public GitHub tree has 56 pictures under `nieuwe fotos_SFM/`. The additional **147 original/earlier pictures** still have to be uploaded from the separate extracted picture pack into `original-photos/` and `extra-original-photos/`, **directly on main**. Keep the SFM folder. See `IMAGE_IMPORT.md`. The script uses fallback art until then.
 
-GitHub Actions and GitHub repository files can store updates but do not provide a secure, low-latency, private role-authenticated game server for participants who only use ordinary browser links. We will not publish the private V18 story data or disguise untrusted client-side state as secure multiplayer.
+## Limitations and release status
 
-## Original private game
+- GitHub Pages itself is static; **ntfy.sh is an external public relay** used for this one-off play session. It requires internet and uses no login or private authenticated channel.
+- This is best-effort synchronization. A random session code prevents casual overlap, but a person who knows it could inspect the event stream. This is an accepted decision for this private group.
+- The **47 original scenes, 55 personal flows, 4 Director-gated puzzle checkpoints** and basic original route scoring are in the new browser implementation, but the full original V18 Python engine's interaction details have not all been ported.
+- GitHub Actions static checks are passing. A complete manual five-device trial and finale/branch approval remain outstanding. Do not claim the definitive experience has been validated before that playtest.
+- No actual plot spoilers are included in this guide.
 
-The **private** `FlorineDeSpiegeleer/Blackthorn-Server` repository contains the existing V18 private-game package, with the original role-code access and server-based synchronization. It is preserved unchanged and is not connected to this GitHub Pages preview.
-
-For now, GitHub Pages is the only component needed to view the previews. This is not yet the fully synchronized five-device mystery game.
-
-## Future options
-
-- **GitHub only:** Continue improving the playable static preview and conduct the shared experience with one Director manually coordinating the displays. No secure automatic multiplayer is promised.
-- **Locally hosted Python server later, if desired:** The existing private V18 code could run on one computer over local Wi-Fi while GitHub is used to store the code. This would not require an external cloud provider but would no longer be GitHub-only at runtime.
-
-No external-service configuration is required or requested.
+Use [QA_STATUS.md](QA_STATUS.md) to track what has been verified.
