@@ -17,6 +17,7 @@ const scenes=[
 ];
 const story=Array.isArray(window.BlackthornStory?.scenes)&&window.BlackthornStory.scenes.length ? window.BlackthornStory.scenes : scenes;
 const storyLabel=window.BlackthornStory?.scenes?.length?'ORIGINAL STORY':'PREVIEW EDITION';
+const pictureManifest=window.BlackthornImageManifest||{};
 const photo=name=>'nieuwe%20fotos_SFM/'+encodeURIComponent(name+'.png');
 const key='blackthorn_projector_cinematic_v1';
 const oldKey='blackthorn_projector_screen_v2';
@@ -41,9 +42,16 @@ const sceneInfo=s=>{
  return {chapter:s.kicker||s.stage||'BLACKTHORN ACADEMY',title:s.title||'',body:s.player_body||s.text||'',image:s.image||s.background||'',kind:s.type||'narration',lines:s.dialogue||[],display_location:s.display_location||''};
 };
 function applyImage(name){
- const candidates=[name||'Rainy Gothic Academy'];
- const filename=candidates[0];
- $('image').style.backgroundImage='linear-gradient(90deg,#090e18b0,#10192a33),url("'+photo(filename)+'")';
+ const filename=name||'Rainy Gothic Academy';
+ const location=sceneInfo(currentScene()).display_location||'';
+ const mapped=Object.entries(pictureManifest.locations||{}).find(([key])=>location.toUpperCase().includes(key));
+ const preferred=mapped?.[1]||'';
+ const preload=new Image();
+ if(preferred){
+  preload.onload=()=>{$('image').style.backgroundImage='linear-gradient(90deg,#090e18b0,#10192a33),url("'+preferred.replaceAll('"','%22')+'")'};
+  preload.onerror=()=>{$('image').style.backgroundImage='linear-gradient(90deg,#090e18b0,#10192a33),url("'+photo(filename)+'")'};
+  preload.src=preferred;
+ }else $('image').style.backgroundImage='linear-gradient(90deg,#090e18b0,#10192a33),url("'+photo(filename)+'")';
 }
 function setMenu(open){
  $('menu').hidden=!open;$('game').hidden=open;
