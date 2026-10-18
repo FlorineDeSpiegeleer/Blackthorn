@@ -145,6 +145,36 @@ if(view==='blackthorn'){const card=node('div',undefined,'card');card.append(node
   render();
  },'plainbutton');
  ready.disabled=already||remotelyPaused;content.append(ready);
+ const scene=window.BlackthornStory?.scenes?.[current];
+ const marker=String(scene?.puzzle_marker||'');
+ const puzzle=/^P[1-4]_READY$/.test(marker)?marker.slice(0,2):'';
+ if(puzzle){
+  const block=node('div',undefined,'card');
+  block.append(node('h3','Investigation checkpoint '+puzzle));
+  const approved=!!state.approvedPuzzles?.[puzzle];
+  block.append(node('p',approved?'✓ Director approved this checkpoint.':'Write down your observation or theory, then send it privately to the Director.','notice'));
+  const draft=node('textarea',undefined,'notearea');
+  draft.placeholder='Your investigation response…';
+  draft.value=state.puzzleDrafts?.[puzzle]||'';
+  draft.disabled=approved||remotelyPaused;
+  draft.addEventListener('input',()=>{
+   state.puzzleDrafts=state.puzzleDrafts||{};
+   state.puzzleDrafts[puzzle]=draft.value;save();
+  });
+  block.append(draft);
+  if(!approved){
+   const btn=uiButton(state.puzzleSubmissions?.[puzzle]?'Send updated response →':'Submit to Director →',async()=>{
+    const value=draft.value.trim();
+    if(!value)return;
+    btn.disabled=true;
+    const ok=await sync.publishSubmission(role,puzzle,value);
+    if(ok){state.puzzleSubmissions=state.puzzleSubmissions||{};state.puzzleSubmissions[puzzle]=true;save();}
+    render();
+   },'plainbutton');
+   block.append(btn);
+  }
+  content.append(block);
+ }
 }}
 if(view==='map'){const card=node('div',undefined,'card');card.append(node('h3','Academy grounds'),node('p','Great Hall · Library · Courtyard · Observatory'));content.append(card)}
 if(view==='calendar'){let items=[['Arrival','Check-in and settle in'],['Founders’ Evening','Formal academy gathering'],['Classes','Academic timetable']];items.filter((x,i)=>i<=state.stage).forEach(([title,description])=>{let card=node('div',undefined,'card');card.append(node('h3',title),node('p',description));content.append(card)})}
@@ -173,6 +203,11 @@ if(live){
   const stage=Math.min(STAGES.length-1,Math.floor(newScene*STAGES.length/total));
   state.canonicalScene=newScene;
   if(state.stage!==stage||remotelyPaused!==remote.paused||state.lastRenderedScene!==newScene){state.stage=stage;state.lastRenderedScene=newScene;remotelyPaused=remote.paused;save();render();}
+ });
+ sync.onApproval(msg=>{
+   if(!/^P[1-4]$/.test(msg.puzzle))return;
+   state.approvedPuzzles=state.approvedPuzzles||{};
+   state.approvedPuzzles[msg.puzzle]=!!msg.approved;save();render();
  });
  sync.onStatus(next=>{
    status=next;
