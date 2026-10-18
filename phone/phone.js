@@ -2,7 +2,7 @@
 const ROLE=new URLSearchParams(location.search).get('character');
 const VALID=['florine','maxine','sam'];
 const params=new URLSearchParams(location.search);
-const KEY='blackthorn_phone_public_preview_v2_';
+const KEY='blackthorn_phone_public_preview_v2_'+(params.get('session')||'local')+'_';
 let role=VALID.includes(ROLE)?ROLE:'';
 const STAGES=['ARRIVAL','FOUNDERS','BALL','AFTERMATH','ACADEMY'];
 const contacts={florine:'Alexander',maxine:'Theo',sam:'Nate'};
