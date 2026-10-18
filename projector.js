@@ -25,6 +25,9 @@ const q=new URLSearchParams(location.search);
 const sync=window.BlackthornSync;
 const live=Boolean(sync?.enabled);
 const director=q.get('director')==='1';
+const readiness=new Map();
+const playerNames=['florine','maxine','sam'];
+let updateDirectorReadiness=()=>{};
 let saved={};
 try{saved=JSON.parse(localStorage.getItem(key)||localStorage.getItem(oldKey)||'{}')}catch(_){}
 let state={scene:0,paused:false,started:false,...saved};
@@ -107,14 +110,36 @@ function play(){
  if(live&&!director){toast('Waiting for Director');return}
  state.started=true;state.paused=false;save();setMenu(false);broadcast();
 }
+function requiresReady(){
+ const meta=currentScene();
+ return !!(meta&&!Array.isArray(meta)&&String(meta.shared_interactions||'').includes('WACHT TOT ALLE DRIE KLAAR ZIJN'));
+}
+function readyList(){
+ return playerNames.filter(role=>readiness.get(role)===state.scene);
+}
+function performNext(){
+ if(state.scene>=story.length-1){state.started=false;save();setMenu(true);return}
+ state.scene++;readiness.clear();save();renderScene();updateDirectorReadiness();broadcast();
+}
 function next(){
  if(live&&!director || state.paused)return;
- if(state.scene>=story.length-1){state.started=false;save();setMenu(true);return}
- state.scene++;save();renderScene();broadcast();
+ if(live&&director&&requiresReady()&&readyList().length<3){
+  const content=document.createElement('div');
+  const missing=playerNames.filter(role=>!readyList().includes(role));
+  const message=document.createElement('p');
+  message.textContent='Still waiting for: '+missing.map(x=>x[0].toUpperCase()+x.slice(1)).join(', ')+'.';
+  const continueBtn=document.createElement('button');
+  continueBtn.textContent='Continue anyway';
+  continueBtn.onclick=()=>{$('modal').hidden=true;performNext()};
+  content.append(message,continueBtn);
+  openModal('Players not ready',content);
+  return;
+ }
+ performNext();
 }
 function back(){
  if(live&&!director || state.paused)return;
- state.scene=Math.max(0,state.scene-1);save();renderScene();broadcast();
+ state.scene=Math.max(0,state.scene-1);readiness.clear();save();renderScene();updateDirectorReadiness();broadcast();
 }
 function pause(value){
  if(live&&!director)return;
@@ -131,7 +156,7 @@ function confirmNew(){
  const body=document.createElement('div');
  const p=document.createElement('p');p.textContent='Begin a new story from the first scene? This will replace the current projector checkpoint.';
  const b=document.createElement('button');b.textContent='✦ Start New Game';
- b.onclick=()=>{state={scene:0,paused:false,started:true};save();$('modal').hidden=true;setMenu(false);broadcast()};
+ b.onclick=()=>{state={scene:0,paused:false,started:true};readiness.clear();save();$('modal').hidden=true;setMenu(false);updateDirectorReadiness();broadcast()};
  body.append(p,b);openModal('New Game',body);
 }
 function showSettings(){
@@ -184,6 +209,19 @@ if(live){
   const summary=document.createElement('summary');summary.textContent='Director · Player choices';panel.append(summary);
   const log=document.createElement('div');log.textContent='Waiting for choices…';panel.append(log);
   const receipt=[];sync.onChoice(event=>{receipt.unshift(event.role+' · '+event.choiceId+' → '+(event.option+1));receipt.splice(10);log.textContent=receipt.join(' | ')});
+  const readyPanel=document.createElement('p');
+  readyPanel.style.cssText='font-size:13px;color:#e9d5ad';
+  panel.append(readyPanel);
+  updateDirectorReadiness=()=>{
+   const ready=readyList();
+   readyPanel.textContent='Ready for scene '+(state.scene+1)+': '+playerNames.map(p=>(ready.includes(p)?'✓ ':'○ ')+p).join(' · ');
+  };
+  sync.onReady(message=>{
+   if(!playerNames.includes(message.role)||message.scene!==state.scene)return;
+   readiness.set(message.role,message.scene);updateDirectorReadiness();
+  });
+  sync.onHello(()=>{if(state.started)broadcast()});
+  updateDirectorReadiness();
   document.body.append(panel);
  }
  sync.connect();
