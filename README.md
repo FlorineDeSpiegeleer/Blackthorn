@@ -19,6 +19,12 @@ These URLs require GitHub Pages to be enabled and the new deployment to finish.
 
 No Firebase, Railway or hosted game server is needed. Download the existing private V18 game archive separately, place it beside `START_BLACKTHORN_WINDOWS.bat`, and double-click the starter on a Windows laptop with Python 3.10+. The laptop will act as the private game server for three phones plus a projector. [Full Windows setup instructions](PRIVATE_LAN_GAME_SETUP.md). The attractive public Pages previews have **not yet been integrated into the confidential V18 server**; a full five-device playtest is still required.
 
+## New cinematic projector interface (October 2026)
+
+The main projector now has a golden dark-academia **New Game / Continue / Load / Settings / Credits** menu and a cinematic story renderer with dialogue support (two circular portraits and gold dialogue frames when story data supplies two speakers). Back, pause, local save and ntfy synchronization are implemented. The existing `phone/` visual design is **unchanged**.
+
+Important: the public projector still only contains the original **12 spoiler-safe demo scenes** in `projector.js`. The authentic **47 V18 scenes and 55 role-specific flows** reside in the original private package. They have **not yet been fully migrated into GitHub Pages**. The renderer can load `window.BlackthornStory.scenes` from a future `story-data.js`, but that data file is not yet committed. Do not claim the complete murder-mystery, romance, puzzles or finale are playable from Pages today.
+
 ## One-night GitHub Pages + ntfy multiplayer rehearsal
 
 The public projector and three phone previews now support synchronized **scene position, pause and phone choice receipts** via the same ntfy.sh method used by DigitalWorkstation. No Python, Firebase or Railway is necessary to run this preview.
