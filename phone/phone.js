@@ -23,7 +23,7 @@ let status='connecting';
 
 const node=(tag,text,cls)=>{const n=document.createElement(tag);if(text!==undefined)n.textContent=text;if(cls)n.className=cls;return n};
 const save=()=>localStorage.setItem(KEY+role,JSON.stringify(state));
-const go=(view,thread=null)=>{state.view=view;state.thread=thread;save();render();scrollTo(0,0)};
+const go=(view,thread=null)=>{state.view=view;state.thread=thread;if(view==='map'){state.flags=state.flags||{};state.flags.map_opened='true';}save();render();scrollTo(0,0)};
 function uiButton(text,fn,cls){const b=node('button',text,cls);b.type='button';b.onclick=fn;return b}
 function img(name,cls){const im=node('img',undefined,cls);im.src=photo(name);im.alt=name.replaceAll('_',' ');im.loading='lazy';im.onerror=()=>{im.style.display='none'};return im}
 function time(){return new Intl.DateTimeFormat('en-GB',{hour:'2-digit',minute:'2-digit'}).format(new Date())}
@@ -39,11 +39,37 @@ h.append(grid);const dock=node('div',undefined,'dock');[['✉','messages'],['☎
 function conditionSatisfied(expression){
  const expr=String(expression||'').trim();
  if(!expr)return true;
- const savedFlags=state.flags||{};
- const simple=expr.match(/^([a-zA-Z_][\w.]*)\s*=\s*([\w.-]+)$/);
- if(simple)return String(savedFlags[simple[1]]??'')===simple[2];
- // Do not auto-unlock clues with unrecognized conditions.
- return false;
+ const flags=state.flags||{};
+ const equals=expr.match(/^([a-zA-Z_][\\w.]*)\\s*=\\s*([\\w.-]+)$/);
+ if(equals){
+  const [_,name,wanted]=equals;
+  return String(flags[name]??(name==='map_opened'?'false':''))===wanted;
+ }
+ if(expr==='abs(theo_engagement-adrian_engagement)<=1'){
+  return Math.abs(Number(flags.theo_engagement||0)-Number(flags.adrian_engagement||0))<=1;
+ }
+ if(expr==='after P062A1 and P062B1'){
+  return state.answers?.P062A1!==undefined && state.answers?.P062B1!==undefined;
+ }
+ return false; // Unknown conditions must not unlock content automatically.
+}
+function storeCanonicalChoice(entry,index){
+ state.answers[entry.id]=index;
+ if(entry.canonical){
+  const flags=state.flags||(state.flags={});
+  if(entry.id==='P025')flags.hazard_choice=['A','B','C'][index]||'';
+  if(entry.id==='P036'){
+   flags.b23_route=['Theo','Adrian','none'][index]||'none';
+   flags.w6_route=flags.b23_route;
+  }
+  const f=window.BlackthornStory?.flows?.find(item=>item.flow_id===entry.id);
+  const write=String(f?.state_write||'');
+  const increment=write.match(/^(theo_engagement|adrian_engagement)\\+=1/);
+  if(increment&&index===0)flags[increment[1]]=Number(flags[increment[1]]||0)+1;
+ }
+ save();
+ if(live)sync.publishChoice(role,entry.id,index);
+ render();
 }
 function canonicalEntries(){
  const source=window.BlackthornStory;
@@ -104,7 +130,7 @@ sam:[
 return [...shared,...personal[role]].filter(x=>x.at<=state.stage).map((x,i)=>({...x,id:x.thread+'-'+x.at+'-'+i}))}
 function listMessages(w){header(w,'Messages');const all=visibleEntries(),threads=[...new Set(all.map(x=>x.thread))];const cont=node('div');threads.forEach(thread=>{let entries=all.filter(x=>x.thread===thread),last=entries[entries.length-1];let b=node('button',undefined,'thread');let av=node('div',thread.slice(0,1),'avatar'),detail=node('div');detail.append(node('strong',thread),node('p',last.text));b.append(av,detail);b.onclick=()=>go('thread',thread);cont.append(b)});if(!threads.length)cont.append(node('p','No new messages.','blank'));w.append(cont);nav(w)}
 function drawThread(w){const thread=state.thread||'Suite 417';header(w,thread);const entries=visibleEntries().filter(x=>x.thread===thread);let messages=node('div',undefined,'messages');entries.forEach(entry=>{let box=node('div',undefined,'msg');box.append(node('div',entry.from+' · Received','who'),node('div',entry.text));messages.append(box);if(state.answers[entry.id]!==undefined){let chosen=state.answers[entry.id];let mine=node('div',entry.choices[chosen],'msg mine');messages.append(mine);messages.append(node('div',entry.responses[chosen],'msg'))}});w.append(messages);
-const pending=entries.filter(x=>x.choices&&state.answers[x.id]===undefined);if(pending.length){let current=pending[0],options=node('div',undefined,'replychoices');options.append(node('p','Choose your reply:','notice'));current.choices.forEach((c,i)=>options.append(uiButton(c,()=>{state.answers[current.id]=i;save();if(live)sync.publishChoice(role,current.id,i);render()},'plainbutton')));w.append(options)}nav(w)}
+const pending=entries.filter(x=>Array.isArray(x.choices)&&x.choices.length>0&&state.answers[x.id]===undefined);if(pending.length){let current=pending[0],options=node('div',undefined,'replychoices');options.append(node('p','Choose your reply:','notice'));current.choices.forEach((c,i)=>options.append(uiButton(c,()=>{storeCanonicalChoice(current,i)},'plainbutton')));w.append(options)}nav(w)}
 function drawPhotos(w){header(w,'Photos');const content=node('div',undefined,'content');const grid=node('div',undefined,'photogrid');photos[role].forEach(photoName=>{const a=img(photoName);a.addEventListener('click',()=>go('photo',photoName));grid.append(a)});content.append(grid);w.append(content);nav(w)}
 function drawPhoto(w){header(w,'Photo');let content=node('div',undefined,'content');content.append(img(state.thread,'largephoto'));w.append(content);nav(w)}
 function drawNotes(w){header(w,'Notes');const content=node('div',undefined,'content');content.append(node('p','Private notes — saved on this device only.','notice'));const a=node('textarea',undefined,'notearea');a.placeholder='Write down what you noticed…';a.value=state.notes||'';a.addEventListener('input',()=>{state.notes=a.value;save()});content.append(a);w.append(content);nav(w)}
