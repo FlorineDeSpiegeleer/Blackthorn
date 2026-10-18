@@ -135,7 +135,17 @@ function drawPhotos(w){header(w,'Photos');const content=node('div',undefined,'co
 function drawPhoto(w){header(w,'Photo');let content=node('div',undefined,'content');content.append(img(state.thread,'largephoto'));w.append(content);nav(w)}
 function drawNotes(w){header(w,'Notes');const content=node('div',undefined,'content');content.append(node('p','Private notes — saved on this device only.','notice'));const a=node('textarea',undefined,'notearea');a.placeholder='Write down what you noticed…';a.value=state.notes||'';a.addEventListener('input',()=>{state.notes=a.value;save()});content.append(a);w.append(content);nav(w)}
 function drawOther(w){const view=state.view;header(w,({blackthorn:'Blackthorn',map:'Academy Map',calendar:'Calendar',calls:'Calls',camera:'Camera'}[view]||view));const content=node('div',undefined,'content');
-if(view==='blackthorn'){const card=node('div',undefined,'card');card.append(node('h3','Personal Academy Portal'),node('p','Preview chapter: '+STAGES[state.stage]+'. New messages appear in Messages as chapters are released.'));content.append(card);content.append(node('p',window.BlackthornStory?.scenes?'Your chapter updates as the Director advances.':'Preview only: this button simulates a new chapter on this phone.','notice'));if(!live)content.append(uiButton('Simulate next chapter →',()=>{state.stage=(state.stage+1)%STAGES.length;save();go('messages')},'plainbutton'));else content.append(node('p','Director controls the shared chapter.','notice'))}
+if(view==='blackthorn'){const card=node('div',undefined,'card');card.append(node('h3','Personal Academy Portal'),node('p','Preview chapter: '+STAGES[state.stage]+'. New messages appear in Messages as chapters are released.'));content.append(card);content.append(node('p',window.BlackthornStory?.scenes?'Your chapter updates as the Director advances.':'Preview only: this button simulates a new chapter on this phone.','notice'));if(!live)content.append(uiButton('Simulate next chapter →',()=>{state.stage=(state.stage+1)%STAGES.length;save();go('messages')},'plainbutton'));else {
+ content.append(node('p','Director controls the shared chapter.','notice'));
+ const current=Number(state.canonicalScene)||0;
+ const already=state.readyForScene===current;
+ const ready=uiButton(already?'✓ Ready — waiting for the others':'✓ I am ready for the next scene',()=>{
+  state.readyForScene=current;save();
+  sync.publishReady(role,current);
+  render();
+ },'plainbutton');
+ ready.disabled=already||remotelyPaused;content.append(ready);
+}}
 if(view==='map'){const card=node('div',undefined,'card');card.append(node('h3','Academy grounds'),node('p','Great Hall · Library · Courtyard · Observatory'));content.append(card)}
 if(view==='calendar'){let items=[['Arrival','Check-in and settle in'],['Founders’ Evening','Formal academy gathering'],['Classes','Academic timetable']];items.filter((x,i)=>i<=state.stage).forEach(([title,description])=>{let card=node('div',undefined,'card');card.append(node('h3',title),node('p',description));content.append(card)})}
 if(view==='calls'){content.append(node('p','No recent calls.','blank'))}
