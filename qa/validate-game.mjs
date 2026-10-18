@@ -82,6 +82,27 @@ if(pStart>=0&&pEnd>pStart){
   check(count===2,'Canonical dialogue parser failed');
  }catch(_){problems.push('Dialogue extractor failed to execute')}
 }
+// English-facing story localization must be complete, otherwise Dutch GM notes leak into UI.
+const english={window:{}};
+vm.runInNewContext(get('story-english.js'),english,{filename:'story-english.js'});
+vm.runInNewContext(get('phone-english.js'),english,{filename:'phone-english.js'});
+if(Array.isArray(scenes)){
+ for(const scene of scenes){
+  const e=english.window.BlackthornEnglish?.[scene.scene_id];
+  check(Array.isArray(e)&&e.length===2&&e.every(v=>typeof v==='string'&&v.trim()),'Missing English scene localization');
+ }
+}
+if(Array.isArray(flows)){
+ for(const flow of flows){
+  const e=english.window.BlackthornEnglishFlows?.[flow.flow_id];
+  check(Array.isArray(e)&&typeof e[0]==='string'&&e[0].trim(),'Missing English phone flow');
+  const choices=[flow.intent_1,flow.intent_2,flow.intent_3].filter(v=>String(v||'').trim()).length;
+  for(let k=0;k<choices;k++)check(typeof e?.[k+1]==='string'&&e[k+1].trim(),'Missing English phone option');
+ }
+}
+check(get('index.html').includes('story-english.js'),'Beamer missing English scene loader');
+check(get('director.html').includes('story-english.js'),'Director missing English scene loader');
+check(get('phone/index.html').includes('phone-english.js'),'Phone missing English dialogue loader');
 if(problems.length){
  console.error('Blackthorn static checks FAILED ('+problems.length+').');
  for(const message of [...new Set(problems)])console.error('- '+message);
