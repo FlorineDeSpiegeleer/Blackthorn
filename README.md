@@ -17,7 +17,7 @@ These URLs require GitHub Pages to be enabled and the new deployment to finish.
 
 ## Play original V18 together on Windows (same Wi-Fi)
 
-No Firebase, Railway or hosted game server is needed. Download the existing private V18 game archive separately, place it beside `START_BLACKTHORN_WINDOWS.bat`, and double-click the starter on a Windows laptop with Python 3.10+. The laptop will act as the private game server for three phones plus a projector. [Full Windows setup instructions](PRIVATE_LAN_GAME_SETUP.md). The attractive public Pages previews have **not yet been integrated into the confidential V18 server**; a full five-device playtest is still required.
+This is an **optional legacy alternative**, not the selected final architecture. For the one-night experience, use GitHub Pages + ntfy.sh without running Python. The existing private V18 game archive can still be started locally with `START_BLACKTHORN_WINDOWS.bat` if desired. [Full Windows setup instructions](PRIVATE_LAN_GAME_SETUP.md). The attractive public Pages previews have **not yet been integrated into the confidential V18 server**; a full five-device playtest is still required.
 
 ## New cinematic projector interface (October 2026)
 
@@ -49,10 +49,10 @@ Open Blackthorn on the phone's home-screen app grid, then choose **Simulate next
 
 ## GitHub Pages hosting
 
-The GitHub Pages site is a **spoiler-safe preview**. Its opt-in live synchronization uses the external ntfy.sh message service; there is no separate server to install. It retains local browser progress and independent character previews. **A bare GitHub Pages site cannot synchronize by itself; the ntfy integration above adds best-effort live event delivery for this one-time game.** The private V18 story code remains private and has not been published to Pages. Shared real-time play requires a trusted running process; the optional Windows local launcher starts the separate private V18 Python server for exactly this purpose.
+The GitHub Pages site is a **spoiler-safe preview**. Its opt-in live synchronization uses the external ntfy.sh message service; there is no separate server to install. It retains local browser progress and independent character previews. **A bare GitHub Pages site cannot synchronize by itself; the ntfy integration above adds best-effort live event delivery for this one-time game.** The private V18 story code remains private and has not been published to Pages. Best-effort rehearsal synchronization is now provided by ntfy.sh. The optional local Windows launcher remains available only for the older confidential V18 server implementation.
 
 ## Runtime status and safety
 
-GitHub Pages is still a **spoiler-safe front-end preview**, not a synchronized full game. The private V18 prototype separately includes shared state, private role links and server-authoritative pause. The Windows starter can launch that private server locally, but the public GitHub Pages preview is not connected to it. The complete story, puzzles and finale still need validation.
+GitHub Pages is still a **spoiler-safe front-end preview**, not a synchronized full game. The private V18 prototype separately includes shared state, private role links and server-authoritative pause. The Windows starter can still launch that older private server locally, but the chosen Pages-based version uses ntfy.sh instead. The complete story, puzzles and finale still need validation.
 
-For local server setup, see PRIVATE_LAN_GAME_SETUP.md. Do not publish the private V16 ZIP, _canonical_private.json, access tokens, or GM-only sources here.
+For the selected GitHub Pages + ntfy one-night setup, use the five links in this README. Optional legacy Windows server instructions are in PRIVATE_LAN_GAME_SETUP.md. Do not publish the private V16 ZIP, _canonical_private.json, access tokens, or GM-only sources here.
