@@ -27,6 +27,24 @@ This is an **optional legacy alternative**, not the selected final architecture.
 
 **Not yet fully finished:** 14 conditional role flows require event/choice prerequisites, including one complex formula; those are intentionally not automatically displayed until conditions can be evaluated. Puzzles, branching consequences, role flow gating and full 5-screen runtime have not yet had end-to-end tests. This is a real canonical-data integration, **not yet a validated final playthrough**.
 
+## Start your one-night Blackthorn session — Windows + beamer
+
+**Recommended start:** open the [Director Desk](https://florinedespiegeleer.github.io/Blackthorn/director.html) on your Windows laptop. It creates a random session code automatically and displays five separate links: Director, Beamer, Florine, Maxine and Sam.
+
+1. Open the Director Desk on your laptop; the session code is created for you.
+2. Copy the links from the page (or open the Beamer link there).
+3. Connect the beamer to the Windows laptop using HDMI. Set Windows **Win+P → Extend**, then move the **Beamer** tab to the projected screen and press F11 for fullscreen.
+4. Send each player only her own link and keep the Director Desk privately on the laptop screen.
+5. Press **New Game** on the Director Desk. All devices join the same session through **ntfy.sh**; advance/pause from the Director Desk.
+6. Each player can tap **I am ready for the next scene** in her unchanged Blackthorn Phone → Blackthorn app. The Director Desk shows individual ready confirmations and receives private choice receipts.
+7. On reconnection, a phone or the beamer asks the Director for the current scene; progress and local choices are cached in the browser for that session.
+
+**No Railway, Firebase, or separately installed Python server is required.** The ntfy.sh message relay is an external service that requires working internet access, even when all participants are in the same room. If Wi-Fi internet fails, automatic synchronization pauses. Session codes are not secure authentication; this is an accepted trade-off for a private, one-time friends game.
+
+**Photo reminder:** GitHub still has the 56 `nieuwe fotos_SFM/` images; the 147 original/earlier images in `BLACKTHORN_ORIGINAL_FOTOS_GITHUB.zip` still need uploading as unpacked `original-photos/` and `extra-original-photos/` folders. The UI falls back to existing photos in the meantime.
+
+**Current QA status:** The 47 original scenes and 55 phone flows are integrated; automated script/flow/condition tests run with GitHub Actions. Full puzzle rules, complex romance branches and a five-device visual playthrough remain unverified. See [QA_STATUS.md](QA_STATUS.md).
+
 ## One-night GitHub Pages + ntfy multiplayer rehearsal
 
 The public projector and three phone previews now support synchronized **scene position, pause and phone choice receipts** via the same ntfy.sh method used by DigitalWorkstation. No Python, Firebase or Railway is necessary to run this preview.
