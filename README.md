@@ -19,11 +19,13 @@ These URLs require GitHub Pages to be enabled and the new deployment to finish.
 
 This is an **optional legacy alternative**, not the selected final architecture. For the one-night experience, use GitHub Pages + ntfy.sh without running Python. The existing private V18 game archive can still be started locally with `START_BLACKTHORN_WINDOWS.bat` if desired. [Full Windows setup instructions](PRIVATE_LAN_GAME_SETUP.md). The attractive public Pages previews have **not yet been integrated into the confidential V18 server**; a full five-device playtest is still required.
 
-## New cinematic projector interface (October 2026)
+## Canonical V18 story and original art (October 2026)
 
-The main projector now has a golden dark-academia **New Game / Continue / Load / Settings / Credits** menu and a cinematic story renderer with dialogue support (two circular portraits and gold dialogue frames when story data supplies two speakers). Back, pause, local save and ntfy synchronization are implemented. The existing `phone/` visual design is **unchanged**.
+**Canonical text is now integrated:** `story-data.js` contains all 47 original story scenes and 55 private role flows. These are loaded by the cinematic projector and the existing Blackthorn Phones UI, without rewriting the original script. The projector supports the Aetherium-style menu, dark-gold narration screens and round-portrait dialogue when the content has structured dialogue.
 
-Important: the public projector still only contains the original **12 spoiler-safe demo scenes** in `projector.js`. The authentic **47 V18 scenes and 55 role-specific flows** reside in the original private package. They have **not yet been fully migrated into GitHub Pages**. The renderer can load `window.BlackthornStory.scenes` from a future `story-data.js`, but that data file is not yet committed. Do not claim the complete murder-mystery, romance, puzzles or finale are playable from Pages today.
+**Original artwork is still awaiting file upload:** GitHub currently has 56 pictures in `nieuwe fotos_SFM/`. The additional 24 original V18 pictures and 123 earlier photographs have been collected into a separate import package. It must be extracted and the `original-photos/` and `extra-original-photos/` folders uploaded to GitHub `main`. The page looks for originals via `image-manifest.js` and falls back to existing SFM artwork when an original is absent. See [IMAGE_IMPORT.md](IMAGE_IMPORT.md).
+
+**Not yet fully finished:** 14 conditional role flows require event/choice prerequisites, including one complex formula; those are intentionally not automatically displayed until conditions can be evaluated. Puzzles, branching consequences, role flow gating and full 5-screen runtime have not yet had end-to-end tests. This is a real canonical-data integration, **not yet a validated final playthrough**.
 
 ## One-night GitHub Pages + ntfy multiplayer rehearsal
 
@@ -39,7 +41,7 @@ Choose a new random session word, at least 16 characters, and use the **identica
 
 The Director's page advances/pauses the shared scene. Other devices subscribe to the current state, including reconnects. Character-specific **preview** replies are published as compact `role + choiceId + option` events and appear in the Director's small event panel.
 
-This is a **functional transport integration, not yet the complete V18 game**. The public page still has 12 spoiler-safe projection scenes and sample phone messages. The 47-scene private canon, hidden clues, full answer validation, and finale are **not migrated** from the confidential V18 archive yet. **Do not use this as a complete playtest.**
+The public GitHub Pages experience now loads the 47-scene V18 narrative and 55 phone flows. Conditional branching and complete puzzle validation still need work, and a full multi-device playtest is pending. Do not treat it as fully validated yet.
 
 ntfy channels and the `director=1` flag do not provide real authentication. For this one-off private group the user accepts that trade-off; choose a non-obvious session code and share links only with participants. No secret story content is sent over ntfy events by the current integration.
 
@@ -53,6 +55,6 @@ The GitHub Pages site is a **spoiler-safe preview**. Its opt-in live synchroniza
 
 ## Runtime status and safety
 
-GitHub Pages is still a **spoiler-safe front-end preview**, not a synchronized full game. The private V18 prototype separately includes shared state, private role links and server-authoritative pause. The Windows starter can still launch that older private server locally, but the chosen Pages-based version uses ntfy.sh instead. The complete story, puzzles and finale still need validation.
+GitHub Pages now contains the original V18 storyline; its ntfy communication provides shared scene positions and reply receipts, but some conditional branches and puzzles are not yet complete. The private V18 prototype separately includes shared state, private role links and server-authoritative pause. The Windows starter can still launch that older private server locally, but the chosen Pages-based version uses ntfy.sh instead. The complete story, puzzles and finale still need validation.
 
 For the selected GitHub Pages + ntfy one-night setup, use the five links in this README. Optional legacy Windows server instructions are in PRIVATE_LAN_GAME_SETUP.md. Do not publish the private V16 ZIP, _canonical_private.json, access tokens, or GM-only sources here.
