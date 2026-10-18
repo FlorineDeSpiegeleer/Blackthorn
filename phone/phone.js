@@ -174,7 +174,14 @@ if(live){
   state.canonicalScene=newScene;
   if(state.stage!==stage||remotelyPaused!==remote.paused||state.lastRenderedScene!==newScene){state.stage=stage;state.lastRenderedScene=newScene;remotelyPaused=remote.paused;save();render();}
  });
- sync.onStatus(next=>{status=next;render();});
+ sync.onStatus(next=>{
+   status=next;
+   // Re-advertise readiness after reconnect: ntfy provides events, not a persistent team roster.
+   if(next==='connected'&&state.readyForScene===state.canonicalScene&&Number.isInteger(state.canonicalScene)){
+     sync.publishReady(role,state.canonicalScene);
+   }
+   render();
+ });
  sync.connect();
 }
 
