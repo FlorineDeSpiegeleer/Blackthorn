@@ -41,9 +41,11 @@ if(Array.isArray(scenes)&&Array.isArray(flows)){
  check(Object.keys(manifest.portraits||{}).length>=7,'Original role portraits not mapped');
 }
 
-for(const file of ['story-data.js','image-manifest.js','blackthorn-sync.js','projector.js','phone/phone.js']){
+for(const file of ['story-data.js','image-manifest.js','blackthorn-sync.js','projector.js','phone/phone.js','director.js']){
  try{new vm.Script(get(file),{filename:file})}catch(_){problems.push(file+' has invalid JavaScript syntax')}
 }
+check(get('director.html').includes('director.js'),'Director HTML missing controller');
+check(get('director.html').includes('blackthorn-sync.js'),'Director HTML missing sync');
 for(const file of ['index.html','phone/index.html']){
  const html=get(file);
  check(html.includes('blackthorn-sync.js'),file+' missing sync');
