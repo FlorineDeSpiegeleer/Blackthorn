@@ -53,7 +53,7 @@ for(const file of ['index.html','phone/index.html']){
 }
 // Exercise the actual role-condition evaluator with test-only state (no story text).
 const phone=get('phone/phone.js');
-const cStart=phone.indexOf('function conditionSatisfied(expression){');
+const cStart=phone.indexOf('const engagementRules=');
 const cEnd=phone.indexOf('\nfunction storeCanonicalChoice(',cStart);
 check(cStart>=0&&cEnd>cStart,'Phone condition evaluator missing');
 if(cStart>=0&&cEnd>cStart){
