@@ -1,4 +1,6 @@
 'use strict';
+// Cinematic projection layer. The canonical story data will be loaded from
+// story-data.js when present; preview scenes remain a safe fallback.
 const scenes=[
 ['THE INVITATION','Blackthorn Academy','Beyond the rain-dark gates, a new chapter begins. Three friends have come to Blackthorn, where every choice might matter.','Rainy Gothic Academy'],
 ['PROLOGUE · ARRIVAL','The Gates','The road falls silent behind you. Rain shimmers on the stone, and a distant bell welcomes the academy’s newest arrivals.','Rainy Arrival at the Gothic Academy'],
@@ -13,47 +15,151 @@ const scenes=[
 ['CHAPTER FOUR · FRIENDSHIP','A Moment Together','Florine, Maxine and Sam find time for each other in the middle of a strange term.','Event_Friends_find_each_other'],
 ['PREVIEW END','To Be Continued','The complete private mystery continues in the synchronized V16 server game. This public projection is a spoiler-free preview.','Rainy Gothic Academy']
 ];
-const key='blackthorn_projector_screen_v2';
-let state;try{state=JSON.parse(localStorage.getItem(key)||'{}')}catch{state={}}
-state={scene:0,paused:false,...state};state.scene=Math.min(scenes.length-1,Math.max(0,state.scene|0));
-const $=id=>document.getElementById(id);const save=()=>localStorage.setItem(key,JSON.stringify(state));
+const story=Array.isArray(window.BlackthornStory?.scenes)&&window.BlackthornStory.scenes.length ? window.BlackthornStory.scenes : scenes;
+const storyLabel=window.BlackthornStory?.scenes?.length?'ORIGINAL STORY':'PREVIEW EDITION';
+const photo=name=>'nieuwe%20fotos_SFM/'+encodeURIComponent(name+'.png');
+const key='blackthorn_projector_cinematic_v1';
+const oldKey='blackthorn_projector_screen_v2';
+const q=new URLSearchParams(location.search);
 const sync=window.BlackthornSync;
-const live=!!sync?.enabled;
-const director=new URLSearchParams(location.search).get('director')==='1';
-const syncBadge=document.createElement('div');
-if(live){
- syncBadge.style.cssText='position:fixed;left:14px;bottom:14px;z-index:999;background:#091522ec;color:#eedebe;font:12px system-ui;padding:7px 12px;border:1px solid #8b7957;border-radius:5px';
- syncBadge.textContent='Synchronizing…';
- document.body.append(syncBadge);
- if(!director){$('next').hidden=true;$('pause').hidden=true;$('resume').hidden=true;}
+const live=Boolean(sync?.enabled);
+const director=q.get('director')==='1';
+let saved={};
+try{saved=JSON.parse(localStorage.getItem(key)||localStorage.getItem(oldKey)||'{}')}catch(_){}
+let state={scene:0,paused:false,started:false,...saved};
+state.scene=Math.max(0,Math.min(story.length-1,Number(state.scene)||0));
+let preferences={sound:false,reduceMotion:false};
+try{preferences={...preferences,...JSON.parse(localStorage.getItem('blackthorn_preferences')||'{}')}}catch(_){}
+const $=id=>document.getElementById(id);
+const save=()=>localStorage.setItem(key,JSON.stringify(state));
+const storePrefs=()=>localStorage.setItem('blackthorn_preferences',JSON.stringify(preferences));
+const toast=text=>{const x=$('toast');x.textContent=text;x.hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>x.hidden=true,2700);};
+const currentScene=()=>story[state.scene];
+const plainText=value=>typeof value==='string'?value:Array.isArray(value)?value.join(' '):String(value??'');
+const sceneInfo=s=>{
+ if(Array.isArray(s))return {chapter:s[0],title:s[1],body:s[2],image:s[3],kind:'narration'};
+ return {chapter:s.kicker||s.stage||'BLACKTHORN ACADEMY',title:s.title||'',body:s.player_body||s.text||'',image:s.image||s.background||'',kind:s.type||'narration',lines:s.dialogue||[],display_location:s.display_location||''};
+};
+function applyImage(name){
+ const candidates=[name||'Rainy Gothic Academy'];
+ const filename=candidates[0];
+ $('image').style.backgroundImage='linear-gradient(90deg,#090e18b0,#10192a33),url("'+photo(filename)+'")';
 }
-function broadcast(){if(live&&director)sync.publish(state.scene,state.paused);}
-
-function render(){const s=scenes[state.scene];$('chapter').textContent=s[0];$('title').textContent=s[1];$('words').textContent=s[2];$('image').style.backgroundImage='url("'+photo(s[3])+'")';$('next').textContent=state.scene===scenes.length-1?'Restart preview ↻':state.scene===0?'Enter Blackthorn Academy →':'Continue →';$('paused').hidden=!state.paused;}
-function advance(){if((live&&!director)||state.paused)return;state.scene=(state.scene+1)%scenes.length;save();render();broadcast()}
-function pause(v){if(live&&!director)return;state.paused=Boolean(v);save();render();broadcast()}
-$('next').onclick=advance;$('pause').onclick=()=>pause(true);$('resume').onclick=()=>pause(false);
-document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();advance()}else if(e.key.toLowerCase()==='p'){pause(!state.paused)}});
-save();render();
+function setMenu(open){
+ $('menu').hidden=!open;$('game').hidden=open;
+ $('pause').hidden=open||live&&!director;
+ $('menuBack').hidden=open||live&&!director;
+ if(open)applyImage('Rainy Gothic Academy');
+ else renderScene();
+}
+function renderScene(){
+ const s=sceneInfo(currentScene());
+ $('chapter').textContent=plainText(s.chapter);
+ $('progress').textContent=String(state.scene+1).padStart(2,'0')+' / '+String(story.length).padStart(2,'0');
+ $('title').textContent=plainText(s.title);
+ $('words').textContent=plainText(s.body);
+ applyImage(s.image||'Rainy Gothic Academy');
+ const lines=Array.isArray(s.lines)?s.lines:[];
+ const hasDialogue=lines.length>=2 && lines[0].name && lines[1].name;
+ $('narration').hidden=hasDialogue;$('dialogue').hidden=!hasDialogue;
+ if(hasDialogue){
+  const left=lines[0],right=lines[1];
+  $('speakerLeft').textContent=left.name;$('nameLeft').textContent=left.name;$('lineLeft').textContent=plainText(left.text);
+  $('speakerRight').textContent=right.name;$('nameRight').textContent=right.name;$('lineRight').textContent=plainText(right.text);
+  $('portraitLeft').src=left.portrait||photo(left.image||'Florine_After_the_dance');
+  $('portraitRight').src=right.portrait||photo(right.image||'Sam_Noticed_in_the_crowd');
+  $('portraitLeft').alt=left.name;$('portraitRight').alt=right.name;
+ }
+ $('next').textContent=state.scene===story.length-1?'Return to menu →':'Continue →';
+ $('previous').disabled=state.scene===0;
+ $('paused').hidden=!state.paused;
+ $('continueGame').disabled=!saved.started && !state.started;
+}
+function broadcast(){if(live&&director)sync.publish(state.scene,state.paused)}
+function play(){
+ if(live&&!director){toast('Waiting for Director');return}
+ state.started=true;state.paused=false;save();setMenu(false);broadcast();
+}
+function next(){
+ if(live&&!director || state.paused)return;
+ if(state.scene>=story.length-1){state.started=false;save();setMenu(true);return}
+ state.scene++;save();renderScene();broadcast();
+}
+function back(){
+ if(live&&!director || state.paused)return;
+ state.scene=Math.max(0,state.scene-1);save();renderScene();broadcast();
+}
+function pause(value){
+ if(live&&!director)return;
+ state.paused=Boolean(value);save();renderScene();broadcast();
+}
+function openModal(title,content){
+ $('modalTitle').textContent=title;
+ $('modalBody').replaceChildren();
+ if(typeof content==='string'){$('modalBody').textContent=content;}
+ else $('modalBody').append(content);
+ $('modal').hidden=false;
+}
+function confirmNew(){
+ const body=document.createElement('div');
+ const p=document.createElement('p');p.textContent='Begin a new story from the first scene? This will replace the current projector checkpoint.';
+ const b=document.createElement('button');b.textContent='✦ Start New Game';
+ b.onclick=()=>{state={scene:0,paused:false,started:true};save();$('modal').hidden=true;setMenu(false);broadcast()};
+ body.append(p,b);openModal('New Game',body);
+}
+function showSettings(){
+ const body=document.createElement('div');
+ const p=document.createElement('p');p.textContent='For the clearest projection, use fullscreen (F11). Phones keep their original Blackthorn Phones interface.';
+ body.append(p);
+ for(const [name,keyName] of [['Reduce animations','reduceMotion'],['Ambient audio (when supported)','sound']]){
+  const label=document.createElement('label');label.textContent=name+' ';
+  const check=document.createElement('input');check.type='checkbox';check.checked=!!preferences[keyName];check.style.width='auto';
+  check.onchange=()=>{preferences[keyName]=check.checked;storePrefs();document.body.classList.toggle('reduce-motion',preferences.reduceMotion)};
+  label.append(check);body.append(label);
+ }
+ const stat=document.createElement('p');stat.textContent=live?'Shared session: '+sync.session:'Local preview; add ?session=YOUR_SESSION&director=1 for synced play.';
+ body.append(stat);openModal('Settings',body);
+}
+$('newGame').onclick=confirmNew;
+$('continueGame').onclick=()=>{if(!state.started)return;setMenu(false);broadcast()};
+$('loadGame').onclick=()=>{if(!state.started){toast('No saved checkpoint yet.');return}setMenu(false);toast('Checkpoint restored.');broadcast()};
+$('settingsGame').onclick=showSettings;
+$('creditsGame').onclick=()=>openModal('Credits','Blackthorn Academy · The Veiled Moon. A collaborative mystery experience for Florine, Maxine and Sam.');
+$('modalClose').onclick=()=>{$('modal').hidden=true};
+$('modal').onclick=e=>{if(e.target===$('modal'))$('modal').hidden=true};
+$('next').onclick=next;$('previous').onclick=back;
+$('pause').onclick=()=>pause(true);$('resume').onclick=()=>pause(false);
+$('menuBack').onclick=()=>{if(live&&!director)return;save();setMenu(true)};
+document.addEventListener('keydown',e=>{
+ if(e.target.closest('input,textarea'))return;
+ if(e.key==='Escape'){$('modal').hidden=true;return}
+ if(!$('menu').hidden && (e.key==='Enter')){e.preventDefault();if(state.started)setMenu(false);else confirmNew()}
+ if($('game').hidden)return;
+ if(['ArrowRight',' '].includes(e.key)){e.preventDefault();next()}
+ if(e.key==='ArrowLeft'){e.preventDefault();back()}
+ if(e.key.toLowerCase()==='p')pause(!state.paused);
+});
 if(live){
+ const indicator=document.createElement('div');
+ indicator.style.cssText='position:fixed;bottom:12px;left:12px;z-index:99;background:#0b1822e8;border:1px solid #a58455;padding:6px 10px;font:12px Georgia;color:#efdab6';
+ document.body.append(indicator);
+ sync.onStatus(status=>{indicator.textContent='BLACKTHORN · '+status+(director?' · DIRECTOR':' · BEAMER')});
  sync.subscribe(remote=>{
-   if(director)return;
-   const n=Math.min(scenes.length-1,Math.max(0,remote.scene));
-   if(state.scene!==n||state.paused!==remote.paused){
-    state.scene=n;state.paused=remote.paused;save();render();
-   }
+  if(director)return;
+  const n=Math.min(story.length-1,Math.max(0,remote.scene));
+  const changed=state.scene!==n||state.paused!==remote.paused||!state.started;
+  state.scene=n;state.paused=remote.paused;state.started=true;
+  if(changed){save();setMenu(false)}
  });
- sync.onStatus(status=>syncBadge.textContent='Blackthorn · '+status+(director?' · DIRECTOR':' · BEAMER'));
  if(director){
-  const panel=document.createElement('details');
-  panel.style.cssText='position:fixed;top:12px;right:12px;z-index:999;background:#102030ef;color:#f8e8c8;padding:12px;border:1px solid #9c875f;max-width:280px;font:13px system-ui';
-  const summary=document.createElement('summary');summary.textContent='Director · player replies';panel.append(summary);
-  const log=document.createElement('div');log.textContent='Waiting for replies…';panel.append(log);
-  const history=[];sync.onChoice(ev=>{
-   history.unshift(ev.role.toUpperCase()+' · '+ev.choiceId+' → '+(ev.option+1));
-   history.splice(8);log.textContent=history.join(' | ');
-  });
+  const panel=document.createElement('details');panel.className='director-status';
+  panel.style.cssText='position:fixed;top:5%;right:15%;z-index:98;background:#0b182de8;border:1px solid #bd9c6a;padding:12px;font:14px Georgia;color:#f6e5c2;max-width:320px';
+  const summary=document.createElement('summary');summary.textContent='Director · Player choices';panel.append(summary);
+  const log=document.createElement('div');log.textContent='Waiting for choices…';panel.append(log);
+  const receipt=[];sync.onChoice(event=>{receipt.unshift(event.role+' · '+event.choiceId+' → '+(event.option+1));receipt.splice(10);log.textContent=receipt.join(' | ')});
   document.body.append(panel);
  }
  sync.connect();
 }
+document.body.classList.toggle('reduce-motion',preferences.reduceMotion);
+setMenu(!state.started);
