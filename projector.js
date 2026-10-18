@@ -40,9 +40,40 @@ const storePrefs=()=>localStorage.setItem('blackthorn_preferences',JSON.stringif
 const toast=text=>{const x=$('toast');x.textContent=text;x.hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>x.hidden=true,2700);};
 const currentScene=()=>story[state.scene];
 const plainText=value=>typeof value==='string'?value:Array.isArray(value)?value.join(' '):String(value??'');
+function reactionDialogue(scene){
+ const raw=String(scene?.npc_and_shared_reactions||'');
+ const re=/([A-Z][A-Z .-]{2,36}):\\s*[“"]([^”"]{5,700})[”"]/g;
+ const lines=[...raw.matchAll(re)].map(m=>({name:m[1].trim(),text:m[2]}));
+ // Only literal scripted speech can become portrait dialogue. Never generate lines.
+ return lines.length>=2?lines.slice(0,2):[];
+}
+function silhouette(name){
+ const initials=String(name||'✦').split(/\\s+/).map(x=>x[0]||'').slice(0,2).join('');
+ const svg='<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256"><defs><radialGradient id="g"><stop stop-color="#334456"/><stop offset="1" stop-color="#101a2a"/></radialGradient></defs><circle cx="128" cy="128" r="128" fill="url(#g)"/><circle cx="128" cy="128" r="108" fill="none" stroke="#bd985e" stroke-width="2"/><text x="128" y="153" font-family="Georgia" font-size="64" text-anchor="middle" fill="#f2d8a5">'+initials.replace(/[&<>"]/g,'')+'</text></svg>';
+ return 'data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg);
+}
+function portraitFor(name){
+ const person=String(name||'').toLowerCase();
+ const found=Object.entries(pictureManifest.portraits||{}).find(([key])=>person.includes(key));
+ if(found){
+  const candidates=found[1];
+  return Array.isArray(candidates)?candidates:[candidates];
+ }
+ return [silhouette(name)];
+}
+function setPortrait(imgId,name){
+ const candidates=portraitFor(name);
+ const el=$(imgId);
+ const tryPhoto=n=>{
+  if(n>=candidates.length){el.src=silhouette(name);return;}
+  el.onerror=()=>tryPhoto(n+1);
+  el.src=candidates[n];
+ };
+ tryPhoto(0);
+}
 const sceneInfo=s=>{
  if(Array.isArray(s))return {chapter:s[0],title:s[1],body:s[2],image:s[3],kind:'narration'};
- return {chapter:s.kicker||s.stage||'BLACKTHORN ACADEMY',title:s.title||'',body:s.player_body||s.text||'',image:s.image||s.background||'',kind:s.type||'narration',lines:s.dialogue||[],display_location:s.display_location||''};
+ return {chapter:s.kicker||s.stage||'BLACKTHORN ACADEMY',title:s.title||'',body:s.player_body||s.text||'',image:s.image||s.background||'',kind:s.type||'narration',lines:Array.isArray(s.dialogue)&&s.dialogue.length?s.dialogue:reactionDialogue(s),display_location:s.display_location||''};
 };
 let imageRequest=0;
 const existingSceneFallback=name=>'nieuwe%20fotos_SFM/'+encodeURIComponent(name+'.png');
@@ -96,8 +127,8 @@ function renderScene(){
   const left=lines[0],right=lines[1];
   $('speakerLeft').textContent=left.name;$('nameLeft').textContent=left.name;$('lineLeft').textContent=plainText(left.text);
   $('speakerRight').textContent=right.name;$('nameRight').textContent=right.name;$('lineRight').textContent=plainText(right.text);
-  $('portraitLeft').src=left.portrait||photo(left.image||'Florine_After_the_dance');
-  $('portraitRight').src=right.portrait||photo(right.image||'Sam_Noticed_in_the_crowd');
+  if(left.portrait)$('portraitLeft').src=left.portrait;else setPortrait('portraitLeft',left.name);
+  if(right.portrait)$('portraitRight').src=right.portrait;else setPortrait('portraitRight',right.name);
   $('portraitLeft').alt=left.name;$('portraitRight').alt=right.name;
  }
  $('next').textContent=state.scene===story.length-1?'Return to menu →':'Continue →';
