@@ -1,1 +1,48 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#0b1420"><title>Blackthorn Academy — Projection</title><link rel="stylesheet" href="projector.css"></head><body><main id="projection" aria-live="polite"><div class="scene-image" id="image"></div><div class="scene-shade"></div><header class="cornerbrand">✦ BLACKTHORN <small>ACADEMY</small></header><div class="scene-copy"><span id="chapter"></span><h1 id="title"></h1><p id="words"></p><button id="next">Enter Blackthorn Academy →</button></div><footer id="foot">BLACKTHORN ACADEMY · THE VEILED MOON</footer></main><button id="pause" class="float-pause" aria-label="Pause story">Ⅱ</button><div id="paused" class="pause-screen" hidden><div class="pause-box"><p>BLACKTHORN ACADEMY</p><h2>The story is paused</h2><p>Everything is waiting for you.</p><button id="resume">▶ Resume</button></div></div><script src="blackthorn-sync.js" defer></script><script src="projector.js" defer></script></body></html>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#09131f"><title>Blackthorn Academy — The Veiled Moon</title>
+<link rel="stylesheet" href="projector.css"></head>
+<body>
+<main id="projection" aria-live="polite">
+ <div class="scene-image" id="image"></div><div class="scene-shade"></div>
+ <section id="menu" class="menu-screen">
+   <div class="menu-ornament" aria-hidden="true">✧ ─── ✦ ─── ✧</div>
+   <div class="menu-content">
+    <div class="brand-sigil" aria-hidden="true">✧</div>
+    <h1>BLACKTHORN <span>ACADEMY</span></h1>
+    <div class="menu-subtitle">THE VEILED MOON</div>
+    <div class="menu-divider">✦ ─────── ✧ ─────── ✦</div>
+    <nav class="menu-buttons" aria-label="Main menu">
+     <button id="newGame">✦ <span>New Game</span></button>
+     <button id="continueGame">▤ <span>Continue</span></button>
+     <button id="loadGame">⌑ <span>Load Game</span></button>
+     <button id="settingsGame">⚙ <span>Settings</span></button>
+     <button id="creditsGame">❧ <span>Credits</span></button>
+    </nav>
+    <div class="menu-profile"><span class="profile-symbol">✦</span><div><strong>Suite 417</strong><small>Florine · Maxine · Sam</small></div></div>
+   </div>
+   <p class="menu-footer">✧ &nbsp; THREE FRIENDS. ONE MYSTERY. &nbsp; ✧</p>
+ </section>
+ <section id="game" hidden>
+   <header class="game-brand">✦ BLACKTHORN <small>ACADEMY</small></header>
+   <div class="chapter-marker"><span id="chapter"></span><span id="progress">01 / 12</span></div>
+   <div id="narration" class="narration-panel framed">
+      <span class="eyebrow">THE STORY</span><h2 id="title"></h2><p id="words"></p>
+   </div>
+   <div id="dialogue" class="dialogue-layout" hidden>
+     <div class="dialogue-line line-left"><figure class="portrait"><img id="portraitLeft" alt=""><figcaption id="nameLeft"></figcaption></figure>
+       <div class="dialogue-card framed"><div class="speaker" id="speakerLeft"></div><p id="lineLeft"></p></div></div>
+     <div class="dialogue-line line-right"><div class="dialogue-card framed"><div class="speaker" id="speakerRight"></div><p id="lineRight"></p></div>
+       <figure class="portrait"><img id="portraitRight" alt=""><figcaption id="nameRight"></figcaption></figure></div>
+   </div>
+   <div class="game-actions"><button id="previous" title="Previous scene">← Back</button><button id="next">Continue →</button></div>
+   <footer id="foot">BLACKTHORN ACADEMY · THE VEILED MOON</footer>
+ </section>
+</main>
+<div id="toast" role="status" class="toast" hidden></div>
+<button id="pause" class="float-pause" aria-label="Pause story" hidden>Ⅱ</button>
+<button id="menuBack" class="float-menu" aria-label="Open main menu" hidden>☰</button>
+<div id="paused" class="pause-screen" hidden><div class="pause-box framed"><p>BLACKTHORN ACADEMY</p><h2>The story is paused</h2><p>Everything is waiting for you.</p><button id="resume">▶ Resume</button></div></div>
+<div id="modal" class="modal-overlay" hidden><div class="modal-card framed"><button id="modalClose" aria-label="Close dialog">✕</button><h2 id="modalTitle"></h2><div id="modalBody"></div></div></div>
+<script src="blackthorn-sync.js" defer></script><script src="projector.js" defer></script>
+</body></html>
