@@ -60,7 +60,7 @@ if(cStart>=0&&cEnd>cStart){
  try{
   const snippet=phone.slice(cStart,cEnd);
   const sandbox={state:{flags:{map_opened:'true',hazard_choice:'A',w6_route:'Theo',theo_engagement:2,adrian_engagement:1},answers:{P062A1:0,P062B1:1}}};
-  const evaluate=expression=>vm.runInNewContext(snippet+';conditionSatisfied('+JSON.stringify(expression)+')',sandbox);
+  const evaluate=vm.runInNewContext(snippet+';conditionSatisfied',sandbox);
   check(evaluate('map_opened=true')===true,'map=true conditional not working');
   check(evaluate('map_opened=false')===false,'map=false conditional not working');
   check(evaluate('hazard_choice=A')===true,'choice-based gate failed');
