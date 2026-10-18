@@ -31,7 +31,7 @@
   if(es)return;
   if(!window.EventSource){status('unsupported');return;}
   es=new EventSource(root+'/sse?since=2h');
-  es.onopen=()=>{connected=true;status('connected');};
+  es.onopen=()=>{connected=true;status('connected');if(query.get('director')!=='1')askState();};
   es.onerror=()=>{connected=false;status('reconnecting');};
   es.onmessage=event=>{
    try{
