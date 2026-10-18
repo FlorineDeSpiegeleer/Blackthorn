@@ -88,12 +88,14 @@
  function render(){
   const scene=story[state.scene]||{};
   $('position').textContent='SCENE '+(state.scene+1)+' / '+story.length;
-  $('sceneTitle').textContent=scene.title||'The Academy';
-  $('sceneChapter').textContent=scene.kicker||scene.stage||'';
-  $('sceneInstructions').textContent=[
-   scene.shared_interactions||'',scene.team_task_sequence||'',scene.puzzle_marker?'Puzzle checkpoint: '+scene.puzzle_marker:'',
-   scene.pause_after?'Planned break: '+scene.pause_after:''
-  ].filter(Boolean).join('\n\n')||'Continue when the players have finished the current scene.';
+  const english=window.BlackthornEnglish?.[scene.scene_id];
+  $('sceneTitle').textContent=english?.[0]||'The Academy';
+  $('sceneChapter').textContent=String(scene.stage||'').replaceAll('_',' ');
+  $('sceneInstructions').textContent=english?.[1]||'English Director notes for this scene have not yet been prepared.';
+  if(/^P[1-4]_READY$/.test(String(scene.puzzle_marker||'')))
+   $('sceneInstructions').textContent+='\n\nInvestigation checkpoint: review player submissions before approval.';
+  if(String(scene.shared_interactions||'').includes('WACHT TOT ALLE DRIE KLAAR ZIJN'))
+   $('sceneInstructions').textContent+='\n\nWait until all three players have completed their private phone moments.';
   $('sceneInstructions').style.whiteSpace='pre-wrap';
   $('pause').disabled=!state.started||state.paused;
   $('resume').disabled=!state.started||!state.paused;
