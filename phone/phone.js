@@ -105,12 +105,15 @@ function canonicalEntries(){
    const f=flowById.get(ref);
    if(!f || ![role.toLowerCase(),'all'].includes(String(f.character||'').toLowerCase()))continue;
    if(!conditionSatisfied(f.condition))continue;
-   const choices=[f.intent_1,f.intent_2,f.intent_3].map(x=>String(x||'').trim()).filter(Boolean);
-   const responses=[f.reaction_1,f.reaction_2,f.reaction_3].slice(0,choices.length).map(x=>String(x||''));
+   const localized=window.BlackthornEnglishFlows?.[f.flow_id];
+   // Never display the Dutch source as though it were finished English prose.
+   const count=[f.intent_1,f.intent_2,f.intent_3].filter(x=>String(x||'').trim()).length;
+   const choices=count?Array.from({length:count},(_,n)=>String(localized?.[n+1]||'Reply in your own words')):[];
+   const responses=choices.map((_,n)=>String(localized?.[n+4]||'Your reply has been noted.'));
    result.push({
-     at:i,thread:String(f.thread||'Academy Notices'),
+     at:i,thread:String(f.thread==='Routekeuze'?'Route selection':f.thread==='Finale keuze'?'Final choice':f.thread||'Academy Notices'),
      from:String(f.thread||'Blackthorn Academy'),
-     text:String(f.opening_text||''),choices, responses,
+     text:String(localized?.[0]||'This private conversation is awaiting its English edition.'),choices, responses,
      id:String(f.flow_id),canonical:true,
      conditional:Boolean(String(f.condition||'').trim())
    });
