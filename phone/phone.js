@@ -40,7 +40,7 @@ function conditionSatisfied(expression){
  const expr=String(expression||'').trim();
  if(!expr)return true;
  const flags=state.flags||{};
- const equals=expr.match(/^([a-zA-Z_][\\w.]*)\\s*=\\s*([\\w.-]+)$/);
+ const equals=expr.match(/^([a-zA-Z_][\w.]*)\s*=\s*([\w.-]+)$/);
  if(equals){
   const [_,name,wanted]=equals;
   return String(flags[name]??(name==='map_opened'?'false':''))===wanted;
