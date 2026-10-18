@@ -73,7 +73,8 @@ function setPortrait(imgId,name){
 }
 const sceneInfo=s=>{
  if(Array.isArray(s))return {chapter:s[0],title:s[1],body:s[2],image:s[3],kind:'narration'};
- return {chapter:s.kicker||s.stage||'BLACKTHORN ACADEMY',title:s.title||'',body:s.player_body||s.text||'',image:s.image||s.background||'',kind:s.type||'narration',lines:Array.isArray(s.dialogue)&&s.dialogue.length?s.dialogue:reactionDialogue(s),display_location:s.display_location||''};
+ const en=window.BlackthornEnglish?.[s.scene_id];
+ return {chapter:String(s.stage||'BLACKTHORN ACADEMY').replaceAll('_',' '),title:en?.[0]||'The Academy',body:en?.[1]||'The story continues. Please ask the Director to check the original scene.',image:s.image||s.background||'',kind:s.type||'narration',lines:[],display_location:s.display_location||''};
 };
 let imageRequest=0;
 const existingSceneFallback=name=>'nieuwe%20fotos_SFM/'+encodeURIComponent(name+'.png');
