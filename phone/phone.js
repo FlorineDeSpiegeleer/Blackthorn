@@ -36,36 +36,55 @@ const intro=node('div',undefined,'identity');intro.append(node('div',time(),'clo
 const grid=node('div',undefined,'grid');const apps=[['✉','Messages','messages'],['▧','Photos','photos'],['▣','Camera','camera'],['✦','Blackthorn','blackthorn'],['⌖','Map','map'],['✎','Notes','notes'],['▦','Calendar','calendar'],['☎','Calls','calls']];
 apps.forEach(([ico,label,view])=>{const b=node('button',undefined,'appbutton');const symbol=node('span',ico,'appicon');b.append(symbol,node('span',label));if(view==='messages'&&state.stage>0){b.append(node('span','●','bubble'))}b.onclick=()=>go(view);grid.append(b)});
 h.append(grid);const dock=node('div',undefined,'dock');[['✉','messages'],['☎','calls'],['✎','notes']].forEach(([ico,v])=>dock.append(uiButton(ico,()=>go(v),'appicon')));h.append(dock);w.append(h)}
+// V18's original allowlisted role effects, translated from 1-based server choices
+// to this phone's 0-based option indexes. Never eval content from the story.
+const engagementRules={
+ P013:{0:'theo_engagement'},
+ P016:{0:'theo_engagement',1:'theo_engagement'},
+ P023:{0:'adrian_engagement'},
+ P032:{0:'adrian_engagement'},
+ P035:{0:'theo_engagement'},
+ P042:{0:'adrian_engagement'}
+};
+function routeFor(phase){
+ const flags=state.flags||{};
+ const key=phase==='b23'?'b23_route':'w6_route';
+ if(flags[key]!==undefined)return String(flags[key]);
+ const a=Number(flags.adrian_engagement||0),t=Number(flags.theo_engagement||0);
+ const threshold=phase==='b23'?1:0;
+ return Math.abs(t-a)>threshold?(t>a?'Theo':'Adrian'):'choice';
+}
 function conditionSatisfied(expression){
  const expr=String(expression||'').trim();
  if(!expr)return true;
  const flags=state.flags||{};
- const equals=expr.match(/^([a-zA-Z_][\w.]*)\s*=\s*([\w.-]+)$/);
- if(equals){
-  const [_,name,wanted]=equals;
-  return String(flags[name]??(name==='map_opened'?'false':''))===wanted;
- }
- if(expr==='abs(theo_engagement-adrian_engagement)<=1'){
-  return Math.abs(Number(flags.theo_engagement||0)-Number(flags.adrian_engagement||0))<=1;
- }
+ if(expr==='abs(theo_engagement-adrian_engagement)<=1')return routeFor('b23')==='choice';
  if(expr==='after P062A1 and P062B1'){
-  return state.answers?.P062A1!==undefined && state.answers?.P062B1!==undefined;
+   return state.answers?.P062A1!==undefined&&state.answers?.P062B1!==undefined;
  }
- return false; // Unknown conditions must not unlock content automatically.
+ const m=expr.match(/^([a-zA-Z_][\w.]*)\s*(=|==|!=)\s*([\w-]+)$/);
+ if(!m)return false;
+ const [,name,operator,expected]=m;
+ let actual=flags[name];
+ if(name==='map_opened'&&actual===undefined)actual=false;
+ if(name==='b23_route'||name==='w6_route')actual=routeFor(name==='b23_route'?'b23':'w6');
+ if(actual===undefined)return false;
+ const normalized=String(actual).toLowerCase(),target=expected.toLowerCase();
+ return operator==='!='?normalized!==target:normalized===target;
 }
 function storeCanonicalChoice(entry,index){
  state.answers[entry.id]=index;
  if(entry.canonical){
   const flags=state.flags||(state.flags={});
   if(entry.id==='P025')flags.hazard_choice=['A','B','C'][index]||'';
-  if(entry.id==='P036'){
-   flags.b23_route=['Theo','Adrian','none'][index]||'none';
-   flags.w6_route=flags.b23_route;
-  }
-  const f=window.BlackthornStory?.flows?.find(item=>item.flow_id===entry.id);
-  const write=String(f?.state_write||'');
-  const increment=write.match(/^(theo_engagement|adrian_engagement)\\+=1/);
-  if(increment&&index===0)flags[increment[1]]=Number(flags[increment[1]]||0)+1;
+  const rule=engagementRules[entry.id];
+  const counter=rule?.[index];
+  if(counter)flags[counter]=Math.min(20,Number(flags[counter]||0)+1);
+  if(entry.id==='P036'&&routeFor('b23')==='choice')
+    flags.b23_route=['Theo','Adrian','none'][index]||'none';
+  if(entry.id==='P063')flags.romance_final=['Theo','Adrian','none'][index]||'none';
+  const eventFlags={P003:'met.Alexander',P005A:'met.Nate',P005B:'met.Nate',P006:'met.Theo'};
+  if(eventFlags[entry.id])flags[eventFlags[entry.id]]=true;
  }
  save();
  if(live)sync.publishChoice(role,entry.id,index);
