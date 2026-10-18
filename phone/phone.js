@@ -36,7 +36,37 @@ const intro=node('div',undefined,'identity');intro.append(node('div',time(),'clo
 const grid=node('div',undefined,'grid');const apps=[['✉','Messages','messages'],['▧','Photos','photos'],['▣','Camera','camera'],['✦','Blackthorn','blackthorn'],['⌖','Map','map'],['✎','Notes','notes'],['▦','Calendar','calendar'],['☎','Calls','calls']];
 apps.forEach(([ico,label,view])=>{const b=node('button',undefined,'appbutton');const symbol=node('span',ico,'appicon');b.append(symbol,node('span',label));if(view==='messages'&&state.stage>0){b.append(node('span','●','bubble'))}b.onclick=()=>go(view);grid.append(b)});
 h.append(grid);const dock=node('div',undefined,'dock');[['✉','messages'],['☎','calls'],['✎','notes']].forEach(([ico,v])=>dock.append(uiButton(ico,()=>go(v),'appicon')));h.append(dock);w.append(h)}
+function canonicalEntries(){
+ const source=window.BlackthornStory;
+ if(!source || !Array.isArray(source.scenes) || !Array.isArray(source.flows))return null;
+ const latest=Math.max(0,Math.min(source.scenes.length-1,Number(state.canonicalScene)||0));
+ const seen=new Set();
+ const flowById=new Map(source.flows.map(f=>[String(f.flow_id).trim(),f]));
+ const result=[];
+ for(let i=0;i<=latest;i++){
+  const s=source.scenes[i];
+  const refs=String(s.phone_flow_ids||'').split(/[|,;\s]+/).filter(Boolean);
+  for(const ref of refs){
+   if(seen.has(ref))continue;seen.add(ref);
+   const f=flowById.get(ref);
+   if(!f || ![role.toLowerCase(),'all'].includes(String(f.character||'').toLowerCase()))continue;
+   const choices=[f.intent_1,f.intent_2,f.intent_3].map(x=>String(x||'').trim()).filter(Boolean);
+   const responses=[f.reaction_1,f.reaction_2,f.reaction_3].slice(0,choices.length).map(x=>String(x||''));
+   result.push({
+     at:i,thread:String(f.thread||'Academy Notices'),
+     from:String(f.thread||'Blackthorn Academy'),
+     text:String(f.opening_text||''),choices, responses,
+     id:String(f.flow_id),canonical:true,
+     conditional:Boolean(String(f.condition||'').trim())
+   });
+  }
+ }
+ return result;
+}
 function visibleEntries(){
+ const canonical=canonicalEntries();
+ if(canonical!==null)return canonical;
+
 const shared=[
 {at:0,thread:'Suite 417',from:'Blackthorn Guest Services',text:'Welcome to Blackthorn Academy. Please keep your invitation available at check-in.'},
 {at:1,thread:'Suite 417',from:'Suite 417',text:'Are we all meeting downstairs? I refuse to miss the first evening together.'},
@@ -69,7 +99,7 @@ function drawPhotos(w){header(w,'Photos');const content=node('div',undefined,'co
 function drawPhoto(w){header(w,'Photo');let content=node('div',undefined,'content');content.append(img(state.thread,'largephoto'));w.append(content);nav(w)}
 function drawNotes(w){header(w,'Notes');const content=node('div',undefined,'content');content.append(node('p','Private notes — saved on this device only.','notice'));const a=node('textarea',undefined,'notearea');a.placeholder='Write down what you noticed…';a.value=state.notes||'';a.addEventListener('input',()=>{state.notes=a.value;save()});content.append(a);w.append(content);nav(w)}
 function drawOther(w){const view=state.view;header(w,({blackthorn:'Blackthorn',map:'Academy Map',calendar:'Calendar',calls:'Calls',camera:'Camera'}[view]||view));const content=node('div',undefined,'content');
-if(view==='blackthorn'){const card=node('div',undefined,'card');card.append(node('h3','Personal Academy Portal'),node('p','Preview chapter: '+STAGES[state.stage]+'. New messages appear in Messages as chapters are released.'));content.append(card);content.append(node('p','Preview only: this button simulates a new chapter on this phone. The real game will unlock messages automatically from the private server.','notice'));if(!live)content.append(uiButton('Simulate next chapter →',()=>{state.stage=(state.stage+1)%STAGES.length;save();go('messages')},'plainbutton'));else content.append(node('p','Director controls the shared chapter.','notice'))}
+if(view==='blackthorn'){const card=node('div',undefined,'card');card.append(node('h3','Personal Academy Portal'),node('p','Preview chapter: '+STAGES[state.stage]+'. New messages appear in Messages as chapters are released.'));content.append(card);content.append(node('p',window.BlackthornStory?.scenes?'Your chapter updates as the Director advances.':'Preview only: this button simulates a new chapter on this phone.','notice'));if(!live)content.append(uiButton('Simulate next chapter →',()=>{state.stage=(state.stage+1)%STAGES.length;save();go('messages')},'plainbutton'));else content.append(node('p','Director controls the shared chapter.','notice'))}
 if(view==='map'){const card=node('div',undefined,'card');card.append(node('h3','Academy grounds'),node('p','Great Hall · Library · Courtyard · Observatory'));content.append(card)}
 if(view==='calendar'){let items=[['Arrival','Check-in and settle in'],['Founders’ Evening','Formal academy gathering'],['Classes','Academic timetable']];items.filter((x,i)=>i<=state.stage).forEach(([title,description])=>{let card=node('div',undefined,'card');card.append(node('h3',title),node('p',description));content.append(card)})}
 if(view==='calls'){content.append(node('p','No recent calls.','blank'))}
@@ -91,8 +121,12 @@ function render(){if(!role){chooser();return}document.body.dataset.person=role;c
 render();
 if(live){
  sync.subscribe(remote=>{
-  const stage=Math.min(STAGES.length-1,Math.floor(remote.scene*STAGES.length/12));
-  if(state.stage!==stage||remotelyPaused!==remote.paused){state.stage=stage;remotelyPaused=remote.paused;save();render();}
+  const canon=window.BlackthornStory?.scenes;
+  const total=Array.isArray(canon)&&canon.length?canon.length:12;
+  const newScene=Math.max(0,Math.min(total-1,remote.scene));
+  const stage=Math.min(STAGES.length-1,Math.floor(newScene*STAGES.length/total));
+  state.canonicalScene=newScene;
+  if(state.stage!==stage||remotelyPaused!==remote.paused||state.lastRenderedScene!==newScene){state.stage=stage;state.lastRenderedScene=newScene;remotelyPaused=remote.paused;save();render();}
  });
  sync.onStatus(next=>{status=next;render();});
  sync.connect();
