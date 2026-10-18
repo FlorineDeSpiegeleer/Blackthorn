@@ -5,10 +5,10 @@
  */
 window.BlackthornImageManifest={
   sceneImages:{
-    S02:['generated-backgrounds/BG_North_Lecture_Hall.png','original-photos/hall.webp','nieuwe%20fotos_SFM/Cozy%20Gothic%20Academy%20Tea%20Conversation.png'],
-    S17:['generated-backgrounds/BG_Academy_Clinic.png','original-photos/library.webp','nieuwe%20fotos_SFM/Rainy%20Gothic%20Academy.png'],
-    S24A:['generated-backgrounds/BG_Restricted_Academy_Room.png','original-photos/archive.webp','nieuwe%20fotos_SFM/Rainy%20Gothic%20Academy.png'],
-    S24B:['generated-backgrounds/BG_Restricted_Academy_Room.png','original-photos/archive.webp','nieuwe%20fotos_SFM/Rainy%20Gothic%20Academy.png'],
+    S02:['BG_North_Lecture_Hall.png','original-photos/hall.webp','nieuwe%20fotos_SFM/Cozy%20Gothic%20Academy%20Tea%20Conversation.png'],
+    S17:['BG_Academy_Clinic.png','original-photos/library.webp','nieuwe%20fotos_SFM/Rainy%20Gothic%20Academy.png'],
+    S24A:['BG_Restricted_Academy_Room.png','original-photos/archive.webp','nieuwe%20fotos_SFM/Rainy%20Gothic%20Academy.png'],
+    S24B:['BG_Restricted_Academy_Room.png','original-photos/archive.webp','nieuwe%20fotos_SFM/Rainy%20Gothic%20Academy.png'],
     S00:['original-photos/hero.webp','nieuwe%20fotos_SFM/Rainy%20Gothic%20Academy.png'],
     S04:['original-photos/ball.webp','nieuwe%20fotos_SFM/Event_Masked_ball_opening.png'],
     S05:['original-photos/hall.webp','nieuwe%20fotos_SFM/Gothic%20Academy%20Masquerade%20Toast.png'],
@@ -36,11 +36,11 @@ window.BlackthornImageManifest={
     'GALLERY':['original-photos/gallery.webp','nieuwe%20fotos_SFM/Rainy%20Gothic%20Academy.png'],
     'WEST ROUTE':['extra-original-photos/maintenance_stair.webp','original-photos/courtyard.webp','nieuwe%20fotos_SFM/Event_A_rainstorm_interrupts.png'],
     'COURTYARD':['original-photos/courtyard.webp','nieuwe%20fotos_SFM/Event_A_rainstorm_interrupts.png'],
-    'CLINIC':['generated-backgrounds/BG_Academy_Clinic.png','extra-original-photos/Gothic%20Academy%20Doctor%20in%20Candlelight.webp','original-photos/library.webp','nieuwe%20fotos_SFM/Rainy%20Gothic%20Academy.png'],
+    'CLINIC':['BG_Academy_Clinic.png','extra-original-photos/Gothic%20Academy%20Doctor%20in%20Candlelight.webp','original-photos/library.webp','nieuwe%20fotos_SFM/Rainy%20Gothic%20Academy.png'],
     'CONTROLLED DOORWAY':['extra-original-photos/lantern_at_the_hidden_library_door.webp','original-photos/archive.webp','nieuwe%20fotos_SFM/Rainy%20Gothic%20Academy.png'],
     'RECEPTION ARCADE':['extra-original-photos/3C.%20Reception%20Arcade%20%20Late%20Arrival%20Checkpoint.webp','original-photos/hero.webp','nieuwe%20fotos_SFM/Rainy%20Gothic%20Academy.png'],
     'DINING HALL':['original-photos/hall.webp','nieuwe%20fotos_SFM/Cozy%20Gothic%20Academy%20Tea%20Conversation.png'],
-    'BEPERKTE ACADEMYRUIMTE':['generated-backgrounds/BG_Restricted_Academy_Room.png','original-photos/archive.webp','nieuwe%20fotos_SFM/Rainy%20Gothic%20Academy.png'],
+    'BEPERKTE ACADEMYRUIMTE':['BG_Restricted_Academy_Room.png','original-photos/archive.webp','nieuwe%20fotos_SFM/Rainy%20Gothic%20Academy.png'],
     'BLACKTHORN ACADEMY':['original-photos/hero.webp','nieuwe%20fotos_SFM/Rainy%20Gothic%20Academy.png']
   },
   portraits:{
