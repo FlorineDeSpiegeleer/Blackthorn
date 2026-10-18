@@ -49,6 +49,37 @@ for(const file of ['index.html','phone/index.html']){
  check(html.includes('blackthorn-sync.js'),file+' missing sync');
  check(html.includes('story-data.js'),file+' missing canonical story import');
 }
+// Exercise the actual role-condition evaluator with test-only state (no story text).
+const phone=get('phone/phone.js');
+const cStart=phone.indexOf('function conditionSatisfied(expression){');
+const cEnd=phone.indexOf('\nfunction storeCanonicalChoice(',cStart);
+check(cStart>=0&&cEnd>cStart,'Phone condition evaluator missing');
+if(cStart>=0&&cEnd>cStart){
+ try{
+  const snippet=phone.slice(cStart,cEnd);
+  const sandbox={state:{flags:{map_opened:'true',hazard_choice:'A',w6_route:'Theo',theo_engagement:2,adrian_engagement:1},answers:{P062A1:0,P062B1:1}}};
+  const evaluate=expression=>vm.runInNewContext(snippet+';conditionSatisfied('+JSON.stringify(expression)+')',sandbox);
+  check(evaluate('map_opened=true')===true,'map=true conditional not working');
+  check(evaluate('map_opened=false')===false,'map=false conditional not working');
+  check(evaluate('hazard_choice=A')===true,'choice-based gate failed');
+  check(evaluate('w6_route=Adrian')===false,'alternate route gate incorrectly opened');
+  check(evaluate('abs(theo_engagement-adrian_engagement)<=1')===true,'engagement gate failed');
+  check(evaluate('after P062A1 and P062B1')===true,'joint prerequisite gate failed');
+  check(evaluate('unknown_secret=true')===false,'Unknown flag should not unlock');
+ }catch(_){problems.push('Phone condition evaluator failed to execute')}
+}
+const projector=get('projector.js');
+const pStart=projector.indexOf('function reactionDialogue(scene){');
+const pEnd=projector.indexOf('\nfunction silhouette(',pStart);
+check(pStart>=0&&pEnd>pStart,'Original dialogue extractor missing');
+if(pStart>=0&&pEnd>pStart){
+ try{
+  const snippet=projector.slice(pStart,pEnd);
+  const test='ALPHA: “A test line.” | BETA: “Another test line.”';
+  const count=vm.runInNewContext(snippet+';reactionDialogue({npc_and_shared_reactions:'+JSON.stringify(test)+'}).length');
+  check(count===2,'Canonical dialogue parser failed');
+ }catch(_){problems.push('Dialogue extractor failed to execute')}
+}
 if(problems.length){
  console.error('Blackthorn static checks FAILED ('+problems.length+').');
  for(const message of [...new Set(problems)])console.error('- '+message);
