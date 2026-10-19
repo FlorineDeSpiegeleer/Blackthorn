@@ -103,6 +103,20 @@ if(Array.isArray(flows)){
 check(get('index.html').includes('story-english.js'),'Beamer missing English scene loader');
 check(get('director.html').includes('story-english.js'),'Director missing English scene loader');
 check(get('phone/index.html').includes('phone-english.js'),'Phone missing English dialogue loader');
+// Every scene must have a deliberately selected, physically present background,
+// rather than silently falling through to generic academy / portrait placeholders.
+if(Array.isArray(scenes)){
+ const routes=context.window.BlackthornImageManifest?.sceneImages||{};
+ for(const scene of scenes){
+  const imgs=routes[scene.scene_id];
+  check(Array.isArray(imgs)&&imgs.length>0,'Scene missing curated background: '+scene.scene_id);
+  const raw=imgs?.[0]||'';
+  const decoded=decodeURIComponent(raw);
+  check(raw&&fs.existsSync(path.join(root,decoded)),'Scene art missing on disk: '+scene.scene_id);
+ }
+}
+check(get('projector.css').includes('background-size:contain'),'Projector no longer preserves full scenery');
+check(get('projector.js').includes('titleScenes'),'Projector chapter title rules missing');
 if(problems.length){
  console.error('Blackthorn static checks FAILED ('+problems.length+').');
  for(const message of [...new Set(problems)])console.error('- '+message);
