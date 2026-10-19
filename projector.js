@@ -79,23 +79,24 @@ const sceneInfo=s=>{
 let imageRequest=0;
 const existingSceneFallback=name=>'nieuwe%20fotos_SFM/'+encodeURIComponent(name+'.png');
 function imageCandidates(scene,menu=false){
- const location=String(scene?.display_location||'').toUpperCase();
+ // Curated scene routes are authoritative. Never use an unrelated location
+ // photograph or generic academy image when a chosen image fails.
+ if(menu)return ["extra-original-photos/blackthorn_academy_exterior_rainy_evening.webp"];
  const id=String(scene?.scene_id||'');
- const manifest=pictureManifest;
- const sceneSpecific=menu?[]:(manifest.sceneImages?.[id]||[]);
- const locationMatch=menu?['BLACKTHORN ACADEMY',manifest.locations?.['BLACKTHORN ACADEMY']]:
-  Object.entries(manifest.locations||{}).find(([key])=>location.includes(key));
- const locationImages=locationMatch?.[1]||[];
- const fallback=existingSceneFallback(menu?'Rainy Gothic Academy':(scene?.image||'Rainy Gothic Academy'));
- return [...new Set([...sceneSpecific,...locationImages,fallback,
-  existingSceneFallback('Rainy Gothic Academy')])];
+ return pictureManifest.sceneImages?.[id]||[];
 }
 function applyImage(_name,menu=false){
  const request=++imageRequest;
  const candidates=imageCandidates(menu?null:currentScene(),menu);
  const element=$('image');
+ // Immediately remove the previous scene's background, avoiding stale photos.
+ element.style.removeProperty('--scene-photo');
  const attempt=index=>{
-  if(index>=candidates.length||request!==imageRequest)return;
+  if(request!==imageRequest)return;
+  if(index>=candidates.length){
+   console.warn('Blackthorn: no usable curated scene image for',menu?'MENU':currentScene()?.scene_id);
+   return;
+  }
   const src=candidates[index];
   const probe=new Image();
   probe.onload=()=>{
