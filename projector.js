@@ -100,7 +100,7 @@ function applyImage(_name,menu=false){
   const probe=new Image();
   probe.onload=()=>{
    if(request===imageRequest)
-    element.style.backgroundImage='linear-gradient(90deg,#090e18b0,#10192a33),url("'+src.replaceAll('"','%22')+'")';
+    element.style.setProperty('--scene-photo','url("'+src.replaceAll('"','%22')+'")');
   };
   probe.onerror=()=>attempt(index+1);
   probe.src=src;
@@ -116,10 +116,16 @@ function setMenu(open){
 }
 function renderScene(){
  const s=sceneInfo(currentScene());
- $('chapter').textContent=plainText(s.chapter);
+ const stageLabels={FOUNDERS_MORNING:'Founders Week',GETTING_READY:'Founders Evening',BALL:'The Masquerade',INCIDENT:'The Incident',WEEK1:'Week One',WEEK2:'Week Two',WEEK3:'Week Three',WEEK4:'Week Four',FINALE:'The Finale',EPILOGUE:'Epilogue'};
+ $('chapter').textContent=stageLabels[currentScene()?.stage]||'Blackthorn Academy';
  $('progress').textContent=String(state.scene+1).padStart(2,'0')+' / '+String(story.length).padStart(2,'0');
- $('title').textContent=plainText(s.title);
+ const id=String(currentScene()?.scene_id||'');
+ const titleScenes=new Set(['S00','S06','S08','S12A','S17','S23','S26','S29','S30']);
+ const showTitle=titleScenes.has(id);
+ $('title').textContent=showTitle?plainText(s.title):'';
+ $('title').hidden=!showTitle;
  $('words').textContent=plainText(s.body);
+ $('narration').classList.toggle('has-scene-title',showTitle);
  applyImage(s.image||'Rainy Gothic Academy');
  const lines=Array.isArray(s.lines)?s.lines:[];
  const hasDialogue=lines.length>=2 && lines[0].name && lines[1].name;
