@@ -257,10 +257,7 @@
 
 **MAXINE:** “You asked her a question.”
 
-**FLORINE:** “Or I didn't. Depends whether we decided to be well behaved.”  
-**EDITOR NOTE:** This line is meta and **must not be used verbatim**. Replace with a choice-neutral line below.
-
-**CANON-SAFE REPLACEMENT — FLORINE:** “I thought I'd lose track halfway through.”
+**FLORINE:** “I thought I'd lose track halfway through.”
 
 **SAM:** “I almost did. Then she started talking about how people actually use the rooms.”
 
