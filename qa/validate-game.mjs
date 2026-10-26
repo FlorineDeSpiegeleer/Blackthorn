@@ -138,7 +138,7 @@ if(Array.isArray(flows)){
  }
 }
 check(get('index.html').includes('story-english.js'),'Beamer missing English scene loader');
-check(get('director.html').includes('story-english.js'),'Director missing English scene loader');
+check(get('play.html').includes('No Game Master'),'Shared lobby must clearly be player-led');
 check(get('phone/index.html').includes('phone-english.js'),'Phone missing English dialogue loader');
 // Every scene must have a deliberately selected, physically present background,
 // rather than silently falling through to generic academy / portrait placeholders.
