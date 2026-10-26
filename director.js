@@ -16,7 +16,7 @@
  const story=window.BlackthornStory?.scenes||[];
  const sync=window.BlackthornSync;
  const key='blackthorn_projector_cinematic_v1';
- let state={scene:0,paused:false,started:false};
+ let state={scene:0,beat:0,paused:false,started:false};
  try{state={...state,...JSON.parse(localStorage.getItem(key)||'{}')}}catch(_){}
  state.scene=Math.max(0,Math.min(story.length-1,Number(state.scene)||0));
  const roles=['florine','maxine','sam'];
@@ -87,11 +87,14 @@
  };
  function render(){
   const scene=story[state.scene]||{};
-  $('position').textContent='SCENE '+(state.scene+1)+' / '+story.length;
+  const beats=window.BlackthornOpeningScript?.[scene.scene_id]||[];
+  state.beat=Math.min(Math.max(0,Number(state.beat)||0),Math.max(0,beats.length-1));
+  $('position').textContent='SCENE '+(state.scene+1)+' / '+story.length+(beats.length?' · LINE '+(state.beat+1)+' / '+beats.length:'');
   const english=window.BlackthornEnglish?.[scene.scene_id];
   $('sceneTitle').textContent=english?.[0]||'The Academy';
   $('sceneChapter').textContent=String(scene.stage||'').replaceAll('_',' ');
   $('sceneInstructions').textContent=english?.[1]||'English Director notes for this scene have not yet been prepared.';
+  if(beats.length){$('sceneInstructions').textContent='CURRENT LINE · '+beats[state.beat].speaker+'\n'+beats[state.beat].text+'\n\n'+$('sceneInstructions').textContent;}
   if(/^P[1-4]_READY$/.test(String(scene.puzzle_marker||'')))
    $('sceneInstructions').textContent+='\n\nInvestigation checkpoint: review player submissions before approval.';
   if(String(scene.shared_interactions||'').includes('WACHT TOT ALLE DRIE KLAAR ZIJN'))
@@ -103,24 +106,26 @@
   $('next').disabled=!state.started||state.paused||state.scene===story.length-1;
   readiness();renderReceipts();renderPuzzles();
  }
- function send(){persist();render();if(sync.enabled)sync.publish(state.scene,state.paused)}
+ function send(){persist();render();if(sync.enabled)sync.publish(state.scene,state.paused,state.beat||0)}
  function requiresEveryone(){
   const s=story[state.scene]||{};
   return String(s.shared_interactions||'').includes('WACHT TOT ALLE DRIE KLAAR ZIJN');
  }
  $('start').onclick=()=>{
   if(state.started&&!confirm('Start a new game from scene 1? The current Director checkpoint will be replaced.'))return;
-  state={scene:0,paused:false,started:true};ready.clear();receipts.length=0;known.clear();submissions.clear();approvals={};localStorage.setItem(approvalKey,'{}');send();
+  state={scene:0,beat:0,paused:false,started:true};ready.clear();receipts.length=0;known.clear();submissions.clear();approvals={};localStorage.setItem(approvalKey,'{}');send();
  };
- $('previous').onclick=()=>{if(state.paused||state.scene===0)return;state.scene--;ready.clear();send()};
+ $('previous').onclick=()=>{if(state.paused)return;if(state.beat>0){state.beat--;send();return;}if(state.scene===0)return;state.scene--;state.beat=Math.max(0,(window.BlackthornOpeningScript?.[story[state.scene]?.scene_id]?.length||1)-1);ready.clear();send()};
  $('next').onclick=()=>{
   if(state.paused||state.scene>=story.length-1)return;
+  const beats=window.BlackthornOpeningScript?.[story[state.scene]?.scene_id]||[];
+  if(state.beat<beats.length-1){state.beat++;send();return;}
   const puzzle=puzzleForScene();
   if(puzzle&&!approvals[puzzle]){alert('Approve investigation checkpoint '+puzzle+' before advancing.');return;}
   const missing=roles.filter(r=>ready.get(r)!==state.scene);
   if(requiresEveryone()&&missing.length&&
     !confirm('Still waiting for '+missing.join(', ')+'. Continue anyway?'))return;
-  state.scene++;ready.clear();send();
+  state.scene++;state.beat=0;ready.clear();send();
  };
  $('pause').onclick=()=>{state.paused=true;send()};
  $('resume').onclick=()=>{state.paused=false;send()};
@@ -146,7 +151,7 @@
    ready.set(ev.role,ev.scene);readiness();
   });
   sync.onHello(()=>{
-   if(state.started)sync.publish(state.scene,state.paused);
+   if(state.started)sync.publish(state.scene,state.paused,state.beat||0);
    for(const [puzzle,approved] of Object.entries(approvals))if(approved)sync.publishApproval(puzzle,true);
   });
   sync.connect();
