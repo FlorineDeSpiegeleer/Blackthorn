@@ -19,7 +19,7 @@
  function notify(){listeners.forEach(cb=>cb(current));}
  function status(value){statusListeners.forEach(cb=>cb(value));}
  function valid(s){return s&&s.protocol===1&&s.type==='state'&&Number.isSafeInteger(s.revision)&&s.revision>0&&
- Number.isInteger(s.scene)&&s.scene>=0&&s.scene<100&&typeof s.paused==='boolean';}
+ Number.isInteger(s.scene)&&s.scene>=0&&s.scene<100&&typeof s.paused==='boolean'&&(s.beat===undefined||(Number.isInteger(s.beat)&&s.beat>=0&&s.beat<200));}
  function accept(state){
   if(!valid(state)||state.revision<=lastRevision)return;
   lastRevision=state.revision;current=state;
@@ -58,10 +58,10 @@
    return true;
   }catch(_){status('offline');return false;}
  }
- async function publish(scene,paused){
+ async function publish(scene,paused,beat=0){
   if(!Number.isInteger(scene)||scene<0||scene>=100)return false;
   const revision=Math.max(Date.now()*1000, lastRevision+1);
-  const payload={protocol:1,type:'state',scene,paused:!!paused,revision,source:instance};
+  const payload={protocol:1,type:'state',scene,beat:Math.max(0,Math.min(199,Number(beat)||0)),paused:!!paused,revision,source:instance};
   accept(payload);return send(payload);
  }
  async function publishChoice(role,choiceId,option){
