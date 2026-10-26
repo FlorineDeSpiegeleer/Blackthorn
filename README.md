@@ -1,3 +1,7 @@
+> **CURRENT GAME DESIGN (26 October 2026): THREE PLAYERS, NO GAME MASTER.**
+> Florine, Maxine and Sam all play equally. Start at [Play Together](https://florinedespiegeleer.github.io/Blackthorn/play.html), which generates a shared session and four links (beamer plus one phone per player). The old Director Desk URL redirects to the same player lobby; nobody should have to read hidden notes, approve puzzles, or steer the story during gameplay.
+> **DEVELOPMENT ONLY:** Automatic beamer progression and all-three-ready gating are now a rehearsal feature. P1–P4 lack source-grounded automatic puzzle checking and stop the rehearsal rather than pretending success. S27 requires the approved finale screenplay; route outcomes and full cross-device playtesting remain outstanding. Older Director instructions in this README are legacy and must not be used for the next playtest.
+
 # Blackthorn Academy — The Veiled Moon
 
 ## The correct experience
