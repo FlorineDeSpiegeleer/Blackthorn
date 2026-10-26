@@ -246,6 +246,10 @@ document.addEventListener('keydown',e=>{
  if(e.key==='ArrowLeft'){e.preventDefault();back()}
  if(e.key.toLowerCase()==='p')pause(!state.paused);
 });
+if(autonomous){
+ const controls=document.querySelector('.game-actions');if(controls)controls.hidden=true;
+ $('menuBack').hidden=true;
+}
 if(live){
  const indicator=document.createElement('div');
  indicator.style.cssText='position:fixed;bottom:12px;left:12px;z-index:99;background:#0b1822e8;border:1px solid #a58455;padding:6px 10px;font:12px Georgia;color:#efdab6';
