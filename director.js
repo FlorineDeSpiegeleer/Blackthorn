@@ -120,6 +120,10 @@
   if(state.paused||state.scene>=story.length-1)return;
   const beats=window.BlackthornOpeningScript?.[story[state.scene]?.scene_id]||[];
   if(state.beat<beats.length-1){state.beat++;send();return;}
+  if(story[state.scene+1]?.scene_id==='S27' && story[state.scene+1]?.player_body==='FINAL_REVEAL_BLOCK_GM_03'){
+   alert('The canonical finale has not been provided. Rehearsal stops here; do not display a placeholder reveal to players.');
+   return;
+  }
   const puzzle=puzzleForScene();
   if(puzzle&&!approvals[puzzle]){alert('Approve investigation checkpoint '+puzzle+' before advancing.');return;}
   const missing=roles.filter(r=>ready.get(r)!==state.scene);
