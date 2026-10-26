@@ -87,7 +87,7 @@
  };
  function render(){
   const scene=story[state.scene]||{};
-  const beats=window.BlackthornOpeningScript?.[scene.scene_id]||[];
+  const beats=window.BlackthornBeatPolicy?.publicBeats(scene.scene_id)||[];
   state.beat=Math.min(Math.max(0,Number(state.beat)||0),Math.max(0,beats.length-1));
   $('position').textContent='SCENE '+(state.scene+1)+' / '+story.length+(beats.length?' · LINE '+(state.beat+1)+' / '+beats.length:'');
   const english=window.BlackthornEnglish?.[scene.scene_id];
@@ -95,6 +95,8 @@
   $('sceneChapter').textContent=String(scene.stage||'').replaceAll('_',' ');
   $('sceneInstructions').textContent=english?.[1]||'English Director notes for this scene have not yet been prepared.';
   if(beats.length){$('sceneInstructions').textContent='CURRENT LINE · '+beats[state.beat].speaker+'\n'+beats[state.beat].text+'\n\n'+$('sceneInstructions').textContent;}
+  const cues=window.BlackthornBeatPolicy?.directorCues(scene.scene_id)||[];
+  if(cues.length)$('sceneInstructions').textContent+='\n\nDIRECTOR CUES (not projected):\n'+cues.map(x=>'• '+x.text).join('\n');
   if(/^P[1-4]_READY$/.test(String(scene.puzzle_marker||'')))
    $('sceneInstructions').textContent+='\n\nInvestigation checkpoint: review player submissions before approval.';
   if(String(scene.shared_interactions||'').includes('WACHT TOT ALLE DRIE KLAAR ZIJN'))
@@ -115,10 +117,10 @@
   if(state.started&&!confirm('Start a new game from scene 1? The current Director checkpoint will be replaced.'))return;
   state={scene:0,beat:0,paused:false,started:true};ready.clear();receipts.length=0;known.clear();submissions.clear();approvals={};localStorage.setItem(approvalKey,'{}');send();
  };
- $('previous').onclick=()=>{if(state.paused)return;if(state.beat>0){state.beat--;send();return;}if(state.scene===0)return;state.scene--;state.beat=Math.max(0,(window.BlackthornOpeningScript?.[story[state.scene]?.scene_id]?.length||1)-1);ready.clear();send()};
+ $('previous').onclick=()=>{if(state.paused)return;if(state.beat>0){state.beat--;send();return;}if(state.scene===0)return;state.scene--;state.beat=Math.max(0,(window.BlackthornBeatPolicy?.publicBeats(story[state.scene]?.scene_id)?.length||1)-1);ready.clear();send()};
  $('next').onclick=()=>{
   if(state.paused||state.scene>=story.length-1)return;
-  const beats=window.BlackthornOpeningScript?.[story[state.scene]?.scene_id]||[];
+  const beats=window.BlackthornBeatPolicy?.publicBeats(story[state.scene]?.scene_id)||[];
   if(state.beat<beats.length-1){state.beat++;send();return;}
   if(story[state.scene+1]?.scene_id==='S27' && story[state.scene+1]?.player_body==='FINAL_REVEAL_BLOCK_GM_03'){
    alert('The canonical finale has not been provided. Rehearsal stops here; do not display a placeholder reveal to players.');
