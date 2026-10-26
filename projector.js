@@ -19,12 +19,14 @@ const story=Array.isArray(window.BlackthornStory?.scenes)&&window.BlackthornStor
 const storyLabel=window.BlackthornStory?.scenes?.length?'ORIGINAL STORY':'PREVIEW EDITION';
 const pictureManifest=window.BlackthornImageManifest||{};
 const photo=name=>'nieuwe%20fotos_SFM/'+encodeURIComponent(name+'.png');
-const key='blackthorn_projector_cinematic_v1';
+const sessionKey=new URLSearchParams(location.search).get('session')||'';
+const key='blackthorn_projector_cinematic_v1'+(sessionKey?'_'+sessionKey:'');
 const oldKey='blackthorn_projector_screen_v2';
 const q=new URLSearchParams(location.search);
 const sync=window.BlackthornSync;
 const live=Boolean(sync?.enabled);
 const director=q.get('director')==='1';
+const autonomous=live&&q.get('autoplay')==='1'&&!director;
 const readiness=new Map();
 const playerNames=['florine','maxine','sam'];
 let updateDirectorReadiness=()=>{};
@@ -148,9 +150,9 @@ function renderScene(){
  $('paused').hidden=!state.paused;
  $('continueGame').disabled=!saved.started && !state.started;
 }
-function broadcast(){if(live&&director)sync.publish(state.scene,state.paused,state.beat||0)}
+function broadcast(){if(live&&(director||autonomous))sync.publish(state.scene,state.paused,state.beat||0)}
 function play(){
- if(live&&!director){toast('Waiting for Director');return}
+ if(live&&!director&&!autonomous){toast('Waiting for the shared session');return}
  state.started=true;state.paused=false;save();setMenu(false);broadcast();
 }
 function requiresReady(){
@@ -165,9 +167,16 @@ function performNext(){
  state.scene++;state.beat=0;readiness.clear();save();renderScene();updateDirectorReadiness();broadcast();
 }
 function next(){
- if(live&&!director || state.paused)return;
+ if(live&&!director&&!autonomous || state.paused)return;
  const beats=window.BlackthornBeatPolicy?.publicBeats(currentScene()?.scene_id)||[];
  if(state.beat<beats.length-1){state.beat++;save();renderScene();broadcast();return;}
+ if(autonomous&&String(currentScene()?.puzzle_marker||'').match(/^P[1-4]_READY$/)){
+  toast('Rehearsal stops at an unimplemented investigation checkpoint.');return;
+ }
+ if(autonomous&&story[state.scene+1]?.scene_id==='S27'){
+  toast('The final reveal is not yet implemented.');return;
+ }
+ if(autonomous&&readyList().length<3){toast('Waiting for all three players.');return;}
  if(live&&director&&requiresReady()&&readyList().length<3){
   const content=document.createElement('div');
   const missing=playerNames.filter(role=>!readyList().includes(role));
@@ -183,12 +192,12 @@ function next(){
  performNext();
 }
 function back(){
- if(live&&!director || state.paused)return;
+ if(live&&!director&&!autonomous || state.paused)return;
  if(state.beat>0){state.beat--;save();renderScene();broadcast();return;}
  state.scene=Math.max(0,state.scene-1);state.beat=Math.max(0,(window.BlackthornBeatPolicy?.publicBeats(currentScene()?.scene_id)?.length||1)-1);readiness.clear();save();renderScene();updateDirectorReadiness();broadcast();
 }
 function pause(value){
- if(live&&!director)return;
+ if(live&&!director&&!autonomous)return;
  state.paused=Boolean(value);save();renderScene();broadcast();
 }
 function openModal(title,content){
@@ -202,7 +211,7 @@ function confirmNew(){
  const body=document.createElement('div');
  const p=document.createElement('p');p.textContent='Begin a new story from the first scene? This will replace the current projector checkpoint.';
  const b=document.createElement('button');b.textContent='✦ Start New Game';
- b.onclick=()=>{state={scene:0,paused:false,started:true};readiness.clear();save();$('modal').hidden=true;setMenu(false);updateDirectorReadiness();broadcast()};
+ b.onclick=()=>{state={scene:0,beat:0,paused:false,started:true};readiness.clear();save();$('modal').hidden=true;setMenu(false);updateDirectorReadiness();broadcast()};
  body.append(p,b);openModal('New Game',body);
 }
 function showSettings(){
@@ -227,7 +236,7 @@ $('modalClose').onclick=()=>{$('modal').hidden=true};
 $('modal').onclick=e=>{if(e.target===$('modal'))$('modal').hidden=true};
 $('next').onclick=next;$('previous').onclick=back;
 $('pause').onclick=()=>pause(true);$('resume').onclick=()=>pause(false);
-$('menuBack').onclick=()=>{if(live&&!director)return;save();setMenu(true)};
+$('menuBack').onclick=()=>{if(live&&!director&&!autonomous)return;save();setMenu(true)};
 document.addEventListener('keydown',e=>{
  if(e.target.closest('input,textarea'))return;
  if(e.key==='Escape'){$('modal').hidden=true;return}
@@ -241,15 +250,43 @@ if(live){
  const indicator=document.createElement('div');
  indicator.style.cssText='position:fixed;bottom:12px;left:12px;z-index:99;background:#0b1822e8;border:1px solid #a58455;padding:6px 10px;font:12px Georgia;color:#efdab6';
  document.body.append(indicator);
- sync.onStatus(status=>{indicator.textContent='BLACKTHORN · '+status+(director?' · DIRECTOR':' · BEAMER')});
+ sync.onStatus(status=>{indicator.textContent='BLACKTHORN · '+status+(director?' · DIRECTOR':autonomous?' · SHARED PLAY':' · BEAMER')});
  sync.subscribe(remote=>{
-  if(director)return;
+  if(director||autonomous)return;
   const n=Math.min(story.length-1,Math.max(0,remote.scene));
   const b=Math.max(0,Number(remote.beat)||0);
   const changed=state.scene!==n||state.beat!==b||state.paused!==remote.paused||!state.started;
   state.scene=n;state.beat=b;state.paused=remote.paused;state.started=true;
   if(changed){save();setMenu(false)}
  });
+ if(autonomous){
+  let timer=null;
+  const schedule=()=>{
+   clearTimeout(timer);timer=null;
+   if(!state.started||state.paused||$('menu').hidden===false)return;
+   const scene=currentScene();if(!scene)return;
+   const beats=window.BlackthornBeatPolicy?.publicBeats(scene.scene_id)||[];
+   if(state.beat>=beats.length-1){
+    if(/^P[1-4]_READY$/.test(String(scene.puzzle_marker||''))||story[state.scene+1]?.scene_id==='S27')return;
+    if(readyList().length===3)timer=setTimeout(()=>next(),1400);
+    return;
+   }
+   const text=String(beats[state.beat]?.text||'');
+   timer=setTimeout(()=>next(),Math.max(3500,Math.min(13500,3000+text.length*65)));
+  };
+  const rerender=renderScene;
+  renderScene=function(){rerender();schedule();};
+  sync.onReady(message=>{
+   if(!playerNames.includes(message.role)||message.scene!==state.scene)return;
+   readiness.set(message.role,message.scene);schedule();
+  });
+  sync.onHello(()=>{if(state.started)broadcast()});
+  const oldSetMenu=setMenu;
+  setMenu=function(open){oldSetMenu(open);schedule();};
+  const oldPause=pause;
+  pause=function(value){oldPause(value);schedule();};
+  // No director-only log or manual scene control in a three-player session.
+ }
  if(director){
   const panel=document.createElement('details');panel.className='director-status';
   panel.style.cssText='position:fixed;top:5%;right:15%;z-index:98;background:#0b182de8;border:1px solid #bd9c6a;padding:12px;font:14px Georgia;color:#f6e5c2;max-width:320px';
