@@ -8,6 +8,15 @@ const root=process.cwd();
 const get=file=>fs.readFileSync(path.join(root,file),'utf8');
 const context={window:{}};
 for(const file of ['story-data.js','image-manifest.js'])vm.runInNewContext(get(file),context,{filename:file});
+vm.runInNewContext(get('opening-script.js'),context,{filename:'opening-script.js'});
+const opening=context.window.BlackthornOpeningScript||{};
+for(const id of ['S00','S01','S02','S03','S04','S05']){
+ const beats=opening[id];
+ if(!Array.isArray(beats)||beats.length<2)throw new Error('Opening screenplay missing '+id);
+ for(const b of beats)if(typeof b.speaker!=='string'||typeof b.text!=='string'||!b.text.trim())throw new Error('Invalid screenplay beat in '+id);
+}
+if(opening.S04.some(b=>['ALEXANDER','NATE','THEO'].includes(b.speaker)))throw new Error('Private romance dialogue leaked to shared opening screenplay');
+if(!get('index.html').includes('opening-script.js')||!get('director.html').includes('opening-script.js'))throw new Error('Opening script not loaded on both displays');
 const {scenes,flows}=context.window.BlackthornStory||{};
 const manifest=context.window.BlackthornImageManifest||{};
 const problems=[];
