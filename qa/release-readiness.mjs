@@ -4,7 +4,7 @@ import fs from 'node:fs';
 const read=p=>fs.readFileSync(p,'utf8');
 const scene=read('story-data.js'),en=read('story-english.js'),phone=read('phone-english.js');
 const report=[
- ['CANONICAL_FINALE','BLOCKED',scene.includes('FINAL_REVEAL_BLOCK_GM_03')?'Original V18 S27 still references protected reveal block; source not present.':'Requires authored finale verification.'],
+ ['CANONICAL_FINALE','BLOCKED',scene.includes('FINAL_REVEAL_BLOCK_GM_03')?'The culprit/method/motive are established in previous canon, but S27 still points to an unwritten GM reveal block; reconstruct and independently verify the actual finale dialogue.':'Requires authored finale verification.'],
  ['PRIVATE_CONSEQUENCES','BLOCKED',/P050:\["Your private assessment will be available/.test(phone)?'P050–P052 contain placeholder assessments.':'Verify all individual endings manually.'],
  ['OPENING_SCRIPT','IMPLEMENTED_UNTESTED',fs.existsSync('opening-script.js')?'Opening scenes now have screenplay beats; cross-device human check is still required.':'Missing opening screenplay.'],
  ['SHARED_SCENES','DRAFT_INTEGRATED','Shared screenplay beats are present for S00–S26 and S28–S30. S27 is blocked; scripts require dialogue quality review and evidence integration.'],
@@ -12,7 +12,7 @@ const report=[
  ['EVIDENCE_OBJECTS','BLOCKED','S06A and S09A–S12B require source-faithful inspectable evidence cards; the new scene beats only prompt inspection, not an implemented evidence viewer.'],
  ['PUZZLES_BRANCHING','TO_TEST','Director-approved checkpoints are not equivalent to complete original mystery-answer validation.'],
  ['AUDIO','OPTIONAL','No final independent voices are selected or integrated.'],
- ['FIVE_SCREEN_REHEARSAL','TO_TEST','Test Director, beamer, 3 phones, all-ready gating, pause, reconnect, branches and finale.']
+ ['FOUR_SCREEN_REHEARSAL','TO_TEST','Test one automatic beamer and three equal player phones; no Game Master, no manual puzzle approval.']
 ];
 console.log('BLACKTHORN RELEASE READINESS — manual blockers (not a CI substitute)');
 for(const [name,status,note] of report)console.log(status.padEnd(22),name.padEnd(24),note);
