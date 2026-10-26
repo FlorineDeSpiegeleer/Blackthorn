@@ -151,8 +151,40 @@ sam:[
 ]};
 return [...shared,...personal[role]].filter(x=>x.at<=state.stage).map((x,i)=>({...x,id:x.thread+'-'+x.at+'-'+i}))}
 function listMessages(w){header(w,'Messages');const all=visibleEntries(),threads=[...new Set(all.map(x=>x.thread))];const cont=node('div');threads.forEach(thread=>{let entries=all.filter(x=>x.thread===thread),last=entries[entries.length-1];let b=node('button',undefined,'thread');let av=node('div',thread.slice(0,1),'avatar'),detail=node('div');detail.append(node('strong',thread),node('p',last.text));b.append(av,detail);b.onclick=()=>go('thread',thread);cont.append(b)});if(!threads.length)cont.append(node('p','No new messages.','blank'));w.append(cont);nav(w)}
-function drawThread(w){const thread=state.thread||'Suite 417';header(w,thread);const entries=visibleEntries().filter(x=>x.thread===thread);let messages=node('div',undefined,'messages');entries.forEach(entry=>{let box=node('div',undefined,'msg');box.append(node('div',entry.from+' · Received','who'),node('div',entry.text));messages.append(box);if(state.answers[entry.id]!==undefined){let chosen=state.answers[entry.id];let mine=node('div',entry.choices[chosen],'msg mine');messages.append(mine);messages.append(node('div',entry.responses[chosen],'msg'))}});w.append(messages);
-const pending=entries.filter(x=>Array.isArray(x.choices)&&x.choices.length>0&&state.answers[x.id]===undefined);if(pending.length){let current=pending[0],options=node('div',undefined,'replychoices');options.append(node('p','Choose your reply:','notice'));current.choices.forEach((c,i)=>options.append(uiButton(c,()=>{storeCanonicalChoice(current,i)},'plainbutton')));w.append(options)}nav(w)}
+function drawThread(w){
+ const thread=state.thread||'Suite 417';
+ header(w,thread);
+ const entries=visibleEntries().filter(x=>x.thread===thread);
+ const messages=node('div',undefined,'messages');
+ const addMessage=(from,text,mine=false)=>{
+   if(!String(text||'').trim())return;
+   const bubble=node('div',undefined,mine?'msg mine':'msg');
+   if(!mine)bubble.append(node('div',from+' · Received','who'));
+   bubble.append(node('div',text));
+   messages.append(bubble);
+ };
+ entries.forEach(entry=>{
+   const extra=entry.canonical?window.BlackthornPrivateDialogue?.[entry.id]:null;
+   for(const line of extra?.before||[])addMessage(line.from||entry.from,line.text);
+   addMessage(entry.from,entry.text);
+   if(state.answers[entry.id]!==undefined){
+     const chosen=state.answers[entry.id];
+     addMessage(role,entry.choices[chosen],true);
+     addMessage(entry.from,entry.responses[chosen]);
+     const followup=extra?.after?.[chosen];
+     if(followup)addMessage(followup.from||entry.from,followup.text);
+   }
+ });
+ w.append(messages);
+ const pending=entries.filter(x=>Array.isArray(x.choices)&&x.choices.length>0&&state.answers[x.id]===undefined);
+ if(pending.length){
+   const current=pending[0],options=node('div',undefined,'replychoices');
+   options.append(node('p','Choose your reply:','notice'));
+   current.choices.forEach((c,i)=>options.append(uiButton(c,()=>storeCanonicalChoice(current,i),'plainbutton')));
+   w.append(options);
+ }
+ nav(w);
+}
 function drawPhotos(w){header(w,'Photos');const content=node('div',undefined,'content');const grid=node('div',undefined,'photogrid');photos[role].forEach(photoName=>{const a=img(photoName);a.addEventListener('click',()=>go('photo',photoName));grid.append(a)});content.append(grid);w.append(content);nav(w)}
 function drawPhoto(w){header(w,'Photo');let content=node('div',undefined,'content');content.append(img(state.thread,'largephoto'));w.append(content);nav(w)}
 function drawNotes(w){header(w,'Notes');const content=node('div',undefined,'content');content.append(node('p','Private notes — saved on this device only.','notice'));const a=node('textarea',undefined,'notearea');a.placeholder='Write down what you noticed…';a.value=state.notes||'';a.addEventListener('input',()=>{state.notes=a.value;save()});content.append(a);w.append(content);nav(w)}
