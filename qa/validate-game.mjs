@@ -10,12 +10,12 @@ const context={window:{}};
 for(const file of ['story-data.js','image-manifest.js'])vm.runInNewContext(get(file),context,{filename:file});
 vm.runInNewContext(get('opening-script.js'),context,{filename:'opening-script.js'});
 const opening=context.window.BlackthornOpeningScript||{};
-for(const id of ['S00','S01','S02','S03','S04','S05']){
+for(const id of ['S00','S01','S02','S03','S04','S05','S06','S06A','S06B','S07','S08','S09A','S09B','S09C','S10','S11','S12A','S12B','S12C']){
  const beats=opening[id];
  if(!Array.isArray(beats)||beats.length<2)throw new Error('Opening screenplay missing '+id);
  for(const b of beats)if(typeof b.speaker!=='string'||typeof b.text!=='string'||!b.text.trim())throw new Error('Invalid screenplay beat in '+id);
 }
-if(opening.S04.some(b=>['ALEXANDER','NATE','THEO'].includes(b.speaker)))throw new Error('Private romance dialogue leaked to shared opening screenplay');
+for(const id of ['S04','S10','S11'])if(opening[id].some(b=>['ALEXANDER','NATE','THEO'].includes(b.speaker)))throw new Error('Private romance dialogue leaked to shared screenplay: '+id);
 if(!get('index.html').includes('opening-script.js')||!get('director.html').includes('opening-script.js'))throw new Error('Opening script not loaded on both displays');
 const {scenes,flows}=context.window.BlackthornStory||{};
 const manifest=context.window.BlackthornImageManifest||{};
