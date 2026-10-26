@@ -117,7 +117,7 @@ function setMenu(open){
 }
 function renderScene(){
  const s=sceneInfo(currentScene());
- const beats=window.BlackthornOpeningScript?.[currentScene()?.scene_id]||[];
+ const beats=window.BlackthornBeatPolicy?.publicBeats(currentScene()?.scene_id)||[];
  state.beat=Math.min(Math.max(0,Number(state.beat)||0),Math.max(0,beats.length-1));
  const activeBeat=beats[state.beat];
  const stageLabels={FOUNDERS_MORNING:'Founders Week',GETTING_READY:'Founders Evening',BALL:'The Masquerade',INCIDENT:'The Incident',WEEK1:'Week One',WEEK2:'Week Two',WEEK3:'Week Three',WEEK4:'Week Four',FINALE:'The Finale',EPILOGUE:'Epilogue'};
@@ -166,7 +166,7 @@ function performNext(){
 }
 function next(){
  if(live&&!director || state.paused)return;
- const beats=window.BlackthornOpeningScript?.[currentScene()?.scene_id]||[];
+ const beats=window.BlackthornBeatPolicy?.publicBeats(currentScene()?.scene_id)||[];
  if(state.beat<beats.length-1){state.beat++;save();renderScene();broadcast();return;}
  if(live&&director&&requiresReady()&&readyList().length<3){
   const content=document.createElement('div');
