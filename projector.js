@@ -185,7 +185,7 @@ function next(){
 function back(){
  if(live&&!director || state.paused)return;
  if(state.beat>0){state.beat--;save();renderScene();broadcast();return;}
- state.scene=Math.max(0,state.scene-1);state.beat=Math.max(0,(window.BlackthornOpeningScript?.[currentScene()?.scene_id]?.length||1)-1);readiness.clear();save();renderScene();updateDirectorReadiness();broadcast();
+ state.scene=Math.max(0,state.scene-1);state.beat=Math.max(0,(window.BlackthornBeatPolicy?.publicBeats(currentScene()?.scene_id)?.length||1)-1);readiness.clear();save();renderScene();updateDirectorReadiness();broadcast();
 }
 function pause(value){
  if(live&&!director)return;
