@@ -9,14 +9,16 @@ const get=file=>fs.readFileSync(path.join(root,file),'utf8');
 const context={window:{}};
 for(const file of ['story-data.js','image-manifest.js'])vm.runInNewContext(get(file),context,{filename:file});
 vm.runInNewContext(get('opening-script.js'),context,{filename:'opening-script.js'});
+for(const file of ['story-script-week2.js','story-script-west-route.js','story-script-records.js','story-script-closing.js'])vm.runInNewContext(get(file),context,{filename:file});
 const opening=context.window.BlackthornOpeningScript||{};
-for(const id of ['S00','S01','S02','S03','S04','S05','S06','S06A','S06B','S07','S08','S09A','S09B','S09C','S10','S11','S12A','S12B','S12C']){
+for(const id of ['S00','S01','S02','S03','S04','S05','S06','S06A','S06B','S07','S08','S09A','S09B','S09C','S10','S11','S12A','S12B','S12C','S13','S14','S14B','S15','S16','S16A','S16B','S16C','S17','S18','S19A','S19B','S19C','S19D','S19E','S20','S21','S22','S23','S24A','S24B','S24C','S25','S26','S28','S29','S30']){
  const beats=opening[id];
  if(!Array.isArray(beats)||beats.length<2)throw new Error('Opening screenplay missing '+id);
  for(const b of beats)if(typeof b.speaker!=='string'||typeof b.text!=='string'||!b.text.trim())throw new Error('Invalid screenplay beat in '+id);
 }
-for(const id of ['S04','S10','S11'])if(opening[id].some(b=>['ALEXANDER','NATE','THEO'].includes(b.speaker)))throw new Error('Private romance dialogue leaked to shared screenplay: '+id);
-if(!get('index.html').includes('opening-script.js')||!get('director.html').includes('opening-script.js'))throw new Error('Opening script not loaded on both displays');
+for(const id of ['S04','S10','S11','S13','S18','S21','S25','S28','S29'])if(opening[id].some(b=>['ALEXANDER','NATE','THEO'].includes(b.speaker)))throw new Error('Private romance dialogue leaked to shared screenplay: '+id);
+for(const page of ['index.html','director.html'])for(const file of ['opening-script.js','story-script-week2.js','story-script-west-route.js','story-script-records.js','story-script-closing.js'])if(!get(page).includes(file))throw new Error(page+' missing '+file);
+if(opening.S27)throw new Error('Protected canonical reveal must not be fabricated in public screenplay');
 const {scenes,flows}=context.window.BlackthornStory||{};
 const manifest=context.window.BlackthornImageManifest||{};
 const problems=[];
