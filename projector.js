@@ -166,6 +166,8 @@ function performNext(){
 }
 function next(){
  if(live&&!director || state.paused)return;
+ const beats=window.BlackthornOpeningScript?.[currentScene()?.scene_id]||[];
+ if(state.beat<beats.length-1){state.beat++;save();renderScene();broadcast();return;}
  if(live&&director&&requiresReady()&&readyList().length<3){
   const content=document.createElement('div');
   const missing=playerNames.filter(role=>!readyList().includes(role));
@@ -182,7 +184,8 @@ function next(){
 }
 function back(){
  if(live&&!director || state.paused)return;
- state.scene=Math.max(0,state.scene-1);readiness.clear();save();renderScene();updateDirectorReadiness();broadcast();
+ if(state.beat>0){state.beat--;save();renderScene();broadcast();return;}
+ state.scene=Math.max(0,state.scene-1);state.beat=Math.max(0,(window.BlackthornOpeningScript?.[currentScene()?.scene_id]?.length||1)-1);readiness.clear();save();renderScene();updateDirectorReadiness();broadcast();
 }
 function pause(value){
  if(live&&!director)return;
@@ -242,8 +245,9 @@ if(live){
  sync.subscribe(remote=>{
   if(director)return;
   const n=Math.min(story.length-1,Math.max(0,remote.scene));
-  const changed=state.scene!==n||state.paused!==remote.paused||!state.started;
-  state.scene=n;state.paused=remote.paused;state.started=true;
+  const b=Math.max(0,Number(remote.beat)||0);
+  const changed=state.scene!==n||state.beat!==b||state.paused!==remote.paused||!state.started;
+  state.scene=n;state.beat=b;state.paused=remote.paused;state.started=true;
   if(changed){save();setMenu(false)}
  });
  if(director){
