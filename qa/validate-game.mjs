@@ -66,6 +66,25 @@ for(const file of ['index.html','phone/index.html']){
  check(html.includes('blackthorn-sync.js'),file+' missing sync');
  check(html.includes('story-data.js'),file+' missing canonical story import');
 }
+// Branch-safe phone dialogue augmentation: no replacement of canon or extra route effects.
+const privateContext={window:{}};
+vm.runInNewContext(get('phone-dialogue-expanded.js'),privateContext,{filename:'phone-dialogue-expanded.js'});
+const additions=privateContext.window.BlackthornPrivateDialogue||{};
+const requiredPrivate=['P010','P011','P012','P013','P014','P015','P016'];
+for(const id of requiredPrivate){
+ const flow=flows.find(f=>f.flow_id===id);
+ const extra=additions[id];
+ check(Boolean(flow&&extra),'Missing expanded private dialogue for '+id);
+ if(!flow||!extra)continue;
+ const options=[flow.intent_1,flow.intent_2,flow.intent_3].filter(Boolean).length;
+ check(extra.after?.length===options,'Expanded replies do not match canonical options for '+id);
+ check(Array.isArray(extra.before)&&extra.before.length>=1,'Missing contextual dialogue for '+id);
+ for(const item of [...extra.before,...(extra.after||[])])
+  check(typeof item.from==='string'&&typeof item.text==='string'&&item.text.trim().length>0,'Invalid expanded dialogue for '+id);
+}
+check(get('phone/index.html').includes('phone-dialogue-expanded.js'),'Phone does not load expanded private dialogue');
+check(get('phone/phone.js').includes('BlackthornPrivateDialogue'),'Phone does not render expanded private dialogue');
+
 // Exercise the actual role-condition evaluator with test-only state (no story text).
 const phone=get('phone/phone.js');
 const cStart=phone.indexOf('const engagementRules=');
