@@ -30,7 +30,7 @@ const playerNames=['florine','maxine','sam'];
 let updateDirectorReadiness=()=>{};
 let saved={};
 try{saved=JSON.parse(localStorage.getItem(key)||localStorage.getItem(oldKey)||'{}')}catch(_){}
-let state={scene:0,paused:false,started:false,...saved};
+let state={scene:0,beat:0,paused:false,started:false,...saved};
 state.scene=Math.max(0,Math.min(story.length-1,Number(state.scene)||0));
 let preferences={sound:false,reduceMotion:false};
 try{preferences={...preferences,...JSON.parse(localStorage.getItem('blackthorn_preferences')||'{}')}}catch(_){}
@@ -117,6 +117,9 @@ function setMenu(open){
 }
 function renderScene(){
  const s=sceneInfo(currentScene());
+ const beats=window.BlackthornOpeningScript?.[currentScene()?.scene_id]||[];
+ state.beat=Math.min(Math.max(0,Number(state.beat)||0),Math.max(0,beats.length-1));
+ const activeBeat=beats[state.beat];
  const stageLabels={FOUNDERS_MORNING:'Founders Week',GETTING_READY:'Founders Evening',BALL:'The Masquerade',INCIDENT:'The Incident',WEEK1:'Week One',WEEK2:'Week Two',WEEK3:'Week Three',WEEK4:'Week Four',FINALE:'The Finale',EPILOGUE:'Epilogue'};
  $('chapter').textContent=stageLabels[currentScene()?.stage]||'Blackthorn Academy';
  $('progress').textContent=String(state.scene+1).padStart(2,'0')+' / '+String(story.length).padStart(2,'0');
@@ -125,11 +128,12 @@ function renderScene(){
  const showTitle=titleScenes.has(id);
  $('title').textContent=showTitle?plainText(s.title):'';
  $('title').hidden=!showTitle;
- $('words').textContent=plainText(s.body);
+ $('words').textContent=activeBeat?.text||plainText(s.body);
+ $('narration').querySelector('.eyebrow').textContent=activeBeat?(activeBeat.speaker==='STAGE'?'SCENE':activeBeat.speaker):'THE STORY';
  $('narration').classList.toggle('has-scene-title',showTitle);
  applyImage(s.image||'Rainy Gothic Academy');
  const lines=Array.isArray(s.lines)?s.lines:[];
- const hasDialogue=lines.length>=2 && lines[0].name && lines[1].name;
+ const hasDialogue=!activeBeat&&lines.length>=2 && lines[0].name && lines[1].name;
  $('narration').hidden=hasDialogue;$('dialogue').hidden=!hasDialogue;
  if(hasDialogue){
   const left=lines[0],right=lines[1];
@@ -139,12 +143,12 @@ function renderScene(){
   if(right.portrait)$('portraitRight').src=right.portrait;else setPortrait('portraitRight',right.name);
   $('portraitLeft').alt=left.name;$('portraitRight').alt=right.name;
  }
- $('next').textContent=state.scene===story.length-1?'Return to menu →':'Continue →';
+ $('next').textContent=activeBeat&&state.beat<beats.length-1?'Next line →':state.scene===story.length-1?'Return to menu →':'Continue →';
  $('previous').disabled=state.scene===0;
  $('paused').hidden=!state.paused;
  $('continueGame').disabled=!saved.started && !state.started;
 }
-function broadcast(){if(live&&director)sync.publish(state.scene,state.paused)}
+function broadcast(){if(live&&director)sync.publish(state.scene,state.paused,state.beat||0)}
 function play(){
  if(live&&!director){toast('Waiting for Director');return}
  state.started=true;state.paused=false;save();setMenu(false);broadcast();
@@ -158,7 +162,7 @@ function readyList(){
 }
 function performNext(){
  if(state.scene>=story.length-1){state.started=false;save();setMenu(true);return}
- state.scene++;readiness.clear();save();renderScene();updateDirectorReadiness();broadcast();
+ state.scene++;state.beat=0;readiness.clear();save();renderScene();updateDirectorReadiness();broadcast();
 }
 function next(){
  if(live&&!director || state.paused)return;
