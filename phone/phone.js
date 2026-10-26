@@ -189,8 +189,8 @@ function drawPhotos(w){header(w,'Photos');const content=node('div',undefined,'co
 function drawPhoto(w){header(w,'Photo');let content=node('div',undefined,'content');content.append(img(state.thread,'largephoto'));w.append(content);nav(w)}
 function drawNotes(w){header(w,'Notes');const content=node('div',undefined,'content');content.append(node('p','Private notes — saved on this device only.','notice'));const a=node('textarea',undefined,'notearea');a.placeholder='Write down what you noticed…';a.value=state.notes||'';a.addEventListener('input',()=>{state.notes=a.value;save()});content.append(a);w.append(content);nav(w)}
 function drawOther(w){const view=state.view;header(w,({blackthorn:'Blackthorn',map:'Academy Map',calendar:'Calendar',calls:'Calls',camera:'Camera'}[view]||view));const content=node('div',undefined,'content');
-if(view==='blackthorn'){const card=node('div',undefined,'card');card.append(node('h3','Personal Academy Portal'),node('p','Preview chapter: '+STAGES[state.stage]+'. New messages appear in Messages as chapters are released.'));content.append(card);content.append(node('p',window.BlackthornStory?.scenes?'Your chapter updates as the Director advances.':'Preview only: this button simulates a new chapter on this phone.','notice'));if(!live)content.append(uiButton('Simulate next chapter →',()=>{state.stage=(state.stage+1)%STAGES.length;save();go('messages')},'plainbutton'));else {
- content.append(node('p','Director controls the shared chapter.','notice'));
+if(view==='blackthorn'){const card=node('div',undefined,'card');card.append(node('h3','Personal Academy Portal'),node('p','Preview chapter: '+STAGES[state.stage]+'. New messages appear in Messages as chapters are released.'));content.append(card);content.append(node('p',window.BlackthornStory?.scenes?'Your chapter follows the shared story.':'Preview only: this button simulates a new chapter on this phone.','notice'));if(!live)content.append(uiButton('Simulate next chapter →',()=>{state.stage=(state.stage+1)%STAGES.length;save();go('messages')},'plainbutton'));else {
+ content.append(node('p','The shared story continues automatically after all three players are ready.','notice'));
  const current=Number(state.canonicalScene)||0;
  const already=state.readyForScene===current;
  const ready=uiButton(already?'✓ Ready — waiting for the others':'✓ I am ready for the next scene',()=>{
@@ -206,7 +206,7 @@ if(view==='blackthorn'){const card=node('div',undefined,'card');card.append(node
   const block=node('div',undefined,'card');
   block.append(node('h3','Investigation checkpoint '+puzzle));
   const approved=!!state.approvedPuzzles?.[puzzle];
-  block.append(node('p',approved?'✓ Director approved this checkpoint.':'Write down your observation or theory, then send it privately to the Director.','notice'));
+  block.append(node('p',approved?'✓ Investigation checkpoint recorded.':'Write down your observation or theory. Automatic puzzle checking is not yet available in this rehearsal.','notice'));
   const draft=node('textarea',undefined,'notearea');
   draft.placeholder='Your investigation response…';
   draft.value=state.puzzleDrafts?.[puzzle]||'';
@@ -217,7 +217,7 @@ if(view==='blackthorn'){const card=node('div',undefined,'card');card.append(node
   });
   block.append(draft);
   if(!approved){
-   const btn=uiButton(state.puzzleSubmissions?.[puzzle]?'Send updated response →':'Submit to Director →',async()=>{
+   const btn=uiButton(state.puzzleSubmissions?.[puzzle]?'Update investigation response →':'Save investigation response →',async()=>{
     const value=draft.value.trim();
     if(!value)return;
     btn.disabled=true;
