@@ -134,4 +134,126 @@ S05:[
 {speaker:'SAM',text:"Give me a second."},
 {speaker:'STAGE',text:"They let the moment settle. The music continues. Nothing more is revealed here."}
 ]
+,
+S06:[
+{speaker:"STAGE",text:"The music stops without warning. Conversations falter, one after another, until the Grand Hall is nearly silent."},
+{speaker:"SAM",text:"Was that supposed to happen?"},
+{speaker:"MAXINE",text:"I don't think so."},
+{speaker:"FLORINE",text:"Look. They're closing the doors."},
+{speaker:"STAGE",text:"Academy staff begin sealing part of the building. Guests are directed away from the restricted corridors."},
+{speaker:"SAM",text:"Should we move?"},
+{speaker:"MAXINE",text:"Not until somebody tells us where we're meant to go."},
+{speaker:"HEADMISTRESS BLACKTHORN",text:"Everyone, please remain where staff can see you. We will speak to those who may be able to help."},
+{speaker:"FLORINE",text:"What happened?"},
+{speaker:"HEADMISTRESS BLACKTHORN",text:"You are listed in the late registration and appear in public event material. That makes you useful as witnesses, not investigators."},
+{speaker:"MAXINE",text:"We're not asking to investigate. We want to know what we're being asked to do."},
+{speaker:"HEADMISTRESS BLACKTHORN",text:"You will be given limited, read-only incident information. Do not enter closed areas or attempt to collect anything yourselves."},
+{speaker:"SAM",text:"All right. Where do we start?"},
+{speaker:"HEADMISTRESS BLACKTHORN",text:"With what has been officially released. Nothing more."},
+{speaker:"STAGE",text:"The Director opens the incident materials for the group. Do not improvise an explanation for the interruption."}
+],
+S06A:[
+{speaker:"STAGE",text:"Observatory Gallery. Only three items are listed in the officially released Details view: a brandy glass, a ceremonial mask and a reference sheet."},
+{speaker:"SAM",text:"There are three entries."},
+{speaker:"FLORINE",text:"Let's open each one before we go."},
+{speaker:"MAXINE",text:"And read what's actually written, not what we expect to be there."},
+{speaker:"SAM",text:"Agreed. I don't want us remembering a guess as if it were a fact."},
+{speaker:"STAGE",text:"INSPECTION PAUSE — Open the authorised Details list. Inspect BRANDY GLASS, CEREMONIAL MASK and REFERENCE SHEET individually. The original object descriptions must be provided from the approved evidence source; do not fabricate them."}
+],
+S06B:[
+{speaker:"STAGE",text:"After the lockdown, the temporary Founders' Evening access permissions are withdrawn."},
+{speaker:"FLORINE",text:"So we can't use the same entrances as last night?"},
+{speaker:"MAXINE",text:"Not without authorisation, apparently."},
+{speaker:"SAM",text:"That makes sense. There are people trying to manage this."},
+{speaker:"FLORINE",text:"I know. I just wish they'd tell us exactly what's changed."},
+{speaker:"STAGE",text:"OFFICIAL NOTICE — Former event permissions no longer grant access. Restricted zones require incident authorisation. Read the notice before continuing."}
+],
+S07:[
+{speaker:"STAGE",text:"Suite 417. The room is quieter now. The two officially released witness-pack documents are available on the players' phones."},
+{speaker:"SAM",text:"I keep thinking about how normal everything felt earlier."},
+{speaker:"MAXINE",text:"I know."},
+{speaker:"FLORINE",text:"They've released two documents."},
+{speaker:"SAM",text:"Can we keep both open? I don't want to lose my place going back and forth."},
+{speaker:"MAXINE",text:"Let's look at the first one, then the second. We can compare them once we've actually read them."},
+{speaker:"FLORINE",text:"And if something doesn't make sense, we write it down."},
+{speaker:"SAM",text:"Without guessing what it means yet?"},
+{speaker:"FLORINE",text:"I'll try."},
+{speaker:"STAGE",text:"DOCUMENT PAUSE — Open the two authorised witness-pack documents on the correct game surface. Their original contents must not be invented or replaced by this dialogue."}
+],
+S08:[
+{speaker:"STAGE",text:"Grand Hall. The chairs no longer face a dance floor. On the stage, a single empty chair stands beside a closed book."},
+{speaker:"SAM",text:"I wasn't expecting the room to feel so different."},
+{speaker:"FLORINE",text:"It's the same room."},
+{speaker:"SAM",text:"I know."},
+{speaker:"MAXINE",text:"We don't have to say anything."},
+{speaker:"STAGE",text:"Professor Aldous Veyne's memorial begins. Celeste Rook is present with the Academy staff. There are no romance interactions during the gathering."},
+{speaker:"FLORINE",text:"I still remember him talking to people at the ball."},
+{speaker:"SAM",text:"So do I."},
+{speaker:"MAXINE",text:"Let's just stay for a while."},
+{speaker:"STAGE",text:"Hold the shot. Do not invent a memorial speech, testimony or evidence."}
+],
+S09A:[
+{speaker:"STAGE",text:"Academy Records. The first formally released archive source is made available under supervision."},
+{speaker:"FLORINE",text:"This is the first thing we can actually check against what we remember."},
+{speaker:"SAM",text:"Then we should read it properly."},
+{speaker:"MAXINE",text:"We will. One source at a time."},
+{speaker:"STAGE",text:"SOURCE PAUSE — Open the authorised CASE_03 archive record. Do not disclose any later contradictions or unreleased information."}
+],
+S09B:[
+{speaker:"STAGE",text:"The next authorised release contains Founders' Evening photographs."},
+{speaker:"SAM",text:"It feels strange seeing photographs of that evening now."},
+{speaker:"MAXINE",text:"You don't have to look at everything at once."},
+{speaker:"SAM",text:"No, I want to. I just need a minute."},
+{speaker:"FLORINE",text:"Take your time."},
+{speaker:"MAXINE",text:"Let's check what the photographs actually show, not what someone told us they show."},
+{speaker:"STAGE",text:"SOURCE PAUSE — Open the approved CASE_04 photography cards individually. Descriptions and provenance remain exactly as supplied by the canonical source."}
+],
+S09C:[
+{speaker:"STAGE",text:"The last authorised event release concerns logistics. It joins the archive source and photographs already available."},
+{speaker:"FLORINE",text:"So now we have three different kinds of records."},
+{speaker:"MAXINE",text:"Which doesn't mean they'll all tell us the same thing."},
+{speaker:"SAM",text:"Or that we already know how they fit together."},
+{speaker:"FLORINE",text:"Fair. Let's lay out what we can actually support."},
+{speaker:"STAGE",text:"INVESTIGATION P1 — Compare only the authorised material from CASE_03, CASE_04 and CASE_05. All three players submit their responses to the Director. The first scheduled break follows only after P1 is completed."}
+],
+S10:[
+{speaker:"STAGE",text:"The first private conversation window begins. Each friend takes a different route through an otherwise ordinary afternoon."},
+{speaker:"SAM",text:"Are we meeting later?"},
+{speaker:"MAXINE",text:"I can. I have a few things to finish first."},
+{speaker:"FLORINE",text:"Same here. Message when you're free."},
+{speaker:"SAM",text:"Okay. See you both."},
+{speaker:"STAGE",text:"PRIVATE WINDOW W1 — On their own Blackthorn Phones: Florine P010 (Alexander), Sam P011/P012 (Nate), Maxine P013 (Theo). Their conversations are not shown on the shared projector. Wait until all three are ready."}
+],
+S11:[
+{speaker:"STAGE",text:"Another day at Blackthorn. The investigation is not the only thing on anyone's mind."},
+{speaker:"MAXINE",text:"I'm getting a coffee before I do anything else."},
+{speaker:"FLORINE",text:"I might come along later."},
+{speaker:"SAM",text:"I'll catch up with you both."},
+{speaker:"STAGE",text:"PRIVATE WINDOW W2 — Florine P014 (Alexander), Sam P015 (Nate), Maxine P016 (Theo). Keep each player's messages private. Wait for all three readiness confirmations."}
+],
+S12A:[
+{speaker:"STAGE",text:"Security Records. A supervised review of specifically released access documentation is permitted."},
+{speaker:"FLORINE",text:"Are we allowed to look through these ourselves?"},
+{speaker:"MAXINE",text:"Only the material they've cleared, I think."},
+{speaker:"SAM",text:"Let's ask before touching anything."},
+{speaker:"STAGE",text:"SOURCE PAUSE — Open the authorised CASE_06 access record under supervision. Knowledge of a location never grants permission to enter it."}
+],
+S12B:[
+{speaker:"STAGE",text:"Conservation Room. The officially released custody and register documentation is placed before the group."},
+{speaker:"SAM",text:"There's a lot of procedure attached to this."},
+{speaker:"MAXINE",text:"For a reason. Someone has to know what was handled, and when."},
+{speaker:"FLORINE",text:"Let's go through it carefully, then."},
+{speaker:"STAGE",text:"INVESTIGATION P2 — Open CASE_07 custody and register material. Submit and complete P2 through the Director before advancing. Do not invent register entries."}
+],
+S12C:[
+{speaker:"STAGE",text:"East Gallery. A guest seminar on provenance begins around a long table. Adrian Voss addresses the group."},
+{speaker:"ADRIAN VOSS",text:"Provenance research isn't the decorative part of the work. And no, 'I have a feeling' isn't a citation."},
+{speaker:"SAM",text:"So what counts as a useful question?"},
+{speaker:"ADRIAN VOSS",text:"One that can be answered with a source. If the answer isn't available, it's better to say so."},
+{speaker:"MAXINE",text:"People don't always like hearing that."},
+{speaker:"ADRIAN VOSS",text:"They don't have to like it. They do need to understand it."},
+{speaker:"FLORINE",text:"And if two sources disagree?"},
+{speaker:"ADRIAN VOSS",text:"First establish what each source actually claims. Then you can talk about the disagreement."},
+{speaker:"STAGE",text:"SEMINAR INTERACTIONS — Maxine may respond in her own words; Florine chooses a public object for a neutral provenance explanation; Sam chooses a public procedure question. No private or sealed material is released."}
+]
 };
