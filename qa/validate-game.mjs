@@ -10,7 +10,11 @@ const context={window:{}};
 for(const file of ['story-data.js','image-manifest.js'])vm.runInNewContext(get(file),context,{filename:file});
 vm.runInNewContext(get('opening-script.js'),context,{filename:'opening-script.js'});
 for(const file of ['story-script-week2.js','story-script-west-route.js','story-script-records.js','story-script-closing.js'])vm.runInNewContext(get(file),context,{filename:file});
+vm.runInNewContext(get('story-beat-policy.js'),context,{filename:'story-beat-policy.js'});
 const opening=context.window.BlackthornOpeningScript||{};
+const policy=context.window.BlackthornBeatPolicy;
+for(const id of ['S06A','S09C','S13','S16A','S19D','S22','S25'])if(policy.publicBeats(id).some(b=>policy.directorCues(id).includes(b)))throw new Error('Director cues leaked: '+id);
+if(policy.publicBeats('S13').length>=opening.S13.length)throw new Error('Private W3 cue still public');
 for(const id of ['S00','S01','S02','S03','S04','S05','S06','S06A','S06B','S07','S08','S09A','S09B','S09C','S10','S11','S12A','S12B','S12C','S13','S14','S14B','S15','S16','S16A','S16B','S16C','S17','S18','S19A','S19B','S19C','S19D','S19E','S20','S21','S22','S23','S24A','S24B','S24C','S25','S26','S28','S29','S30']){
  const beats=opening[id];
  if(!Array.isArray(beats)||beats.length<2)throw new Error('Opening screenplay missing '+id);
