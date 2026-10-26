@@ -21,7 +21,7 @@ for(const id of ['S00','S01','S02','S03','S04','S05','S06','S06A','S06B','S07','
  for(const b of beats)if(typeof b.speaker!=='string'||typeof b.text!=='string'||!b.text.trim())throw new Error('Invalid screenplay beat in '+id);
 }
 for(const id of ['S04','S10','S11','S13','S18','S21','S25','S28','S29'])if(opening[id].some(b=>['ALEXANDER','NATE','THEO'].includes(b.speaker)))throw new Error('Private romance dialogue leaked to shared screenplay: '+id);
-for(const page of ['index.html','director.html'])for(const file of ['opening-script.js','story-script-week2.js','story-script-west-route.js','story-script-records.js','story-script-closing.js'])if(!get(page).includes(file))throw new Error(page+' missing '+file);
+for(const file of ['opening-script.js','story-script-week2.js','story-script-west-route.js','story-script-records.js','story-script-closing.js'])if(!get('index.html').includes(file))throw new Error('Projector missing '+file);
 if(opening.S27)throw new Error('Protected canonical reveal must not be fabricated in public screenplay');
 const {scenes,flows}=context.window.BlackthornStory||{};
 const manifest=context.window.BlackthornImageManifest||{};
@@ -59,8 +59,10 @@ if(Array.isArray(scenes)&&Array.isArray(flows)){
 for(const file of ['story-data.js','image-manifest.js','blackthorn-sync.js','projector.js','phone/phone.js','director.js']){
  try{new vm.Script(get(file),{filename:file})}catch(_){problems.push(file+' has invalid JavaScript syntax')}
 }
-check(get('director.html').includes('director.js'),'Director HTML missing controller');
-check(get('director.html').includes('blackthorn-sync.js'),'Director HTML missing sync');
+check(get('director.html').includes('play.html'),'Old Director page must lead to shared lobby');
+check(get('play.html').includes('autoplay=1'),'Shared lobby must use no-GM autoplay');
+check(get('play.html').includes('character=florine')&&get('play.html').includes('character=maxine')&&get('play.html').includes('character=sam'),'Shared lobby missing player links');
+check(get('projector.js').includes('const autonomous='),'No-GM projector progression missing');
 for(const file of ['index.html','phone/index.html']){
  const html=get(file);
  check(html.includes('blackthorn-sync.js'),file+' missing sync');
