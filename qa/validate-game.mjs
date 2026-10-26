@@ -69,8 +69,9 @@ for(const file of ['index.html','phone/index.html']){
 // Branch-safe phone dialogue augmentation: no replacement of canon or extra route effects.
 const privateContext={window:{}};
 vm.runInNewContext(get('phone-dialogue-expanded.js'),privateContext,{filename:'phone-dialogue-expanded.js'});
+vm.runInNewContext(get('phone-dialogue-week2.js'),privateContext,{filename:'phone-dialogue-week2.js'});
 const additions=privateContext.window.BlackthornPrivateDialogue||{};
-const requiredPrivate=['P010','P011','P012','P013','P014','P015','P016'];
+const requiredPrivate=['P010','P011','P012','P013','P014','P015','P016','P020','P021','P022','P023','P024'];
 for(const id of requiredPrivate){
  const flow=flows.find(f=>f.flow_id===id);
  const extra=additions[id];
@@ -82,7 +83,7 @@ for(const id of requiredPrivate){
  for(const item of [...extra.before,...(extra.after||[])])
   check(typeof item.from==='string'&&typeof item.text==='string'&&item.text.trim().length>0,'Invalid expanded dialogue for '+id);
 }
-check(get('phone/index.html').includes('phone-dialogue-expanded.js'),'Phone does not load expanded private dialogue');
+check(get('phone/index.html').includes('phone-dialogue-expanded.js')&&get('phone/index.html').includes('phone-dialogue-week2.js'),'Phone does not load expanded private dialogue');
 check(get('phone/phone.js').includes('BlackthornPrivateDialogue'),'Phone does not render expanded private dialogue');
 
 // Exercise the actual role-condition evaluator with test-only state (no story text).
