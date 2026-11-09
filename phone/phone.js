@@ -6,7 +6,7 @@ const KEY='blackthorn_phone_public_preview_v2_'+(params.get('session')||'local')
 let role=VALID.includes(ROLE)?ROLE:'';
 const STAGES=['ARRIVAL','FOUNDERS','BALL','AFTERMATH','ACADEMY'];
 const contacts={florine:'Alexander',maxine:'Theo',sam:'Nate'};
-const portrait={florine:'Florine_After_the_dance',maxine:'Maxine_Two_contrasting_glances',sam:'Sam_Noticed_in_the_crowd'};
+const portrait={florine:'Rainy Gothic Academy',maxine:'Rainy Gothic Academy',sam:'Rainy Gothic Academy'}; // Neutral background, no romance foreshadowing.
 const photos={
  florine:['Florine_After_the_dance','Florine_Formal_dance','Florine_Library_debate','Florine_Coffee_whithout_explenation','Florine_Quiet_animal_encounter','Florine_Shared_shelter'],
  maxine:['Maxine_Two_contrasting_glances','Maxine_Theo_Dance_under_the_chandeliers','Maxine_Adrian_Courtyard_date','Maxine_Theo_First_private_rivalry','Maxine_Adrian_Formal_dance_alternative','Maxine_Private_choice_pause'],
@@ -185,8 +185,27 @@ function drawThread(w){
  }
  nav(w);
 }
-function drawPhotos(w){header(w,'Photos');const content=node('div',undefined,'content');const grid=node('div',undefined,'photogrid');photos[role].forEach(photoName=>{const a=img(photoName);a.addEventListener('click',()=>go('photo',photoName));grid.append(a)});content.append(grid);w.append(content);nav(w)}
-function drawPhoto(w){header(w,'Photo');let content=node('div',undefined,'content');content.append(img(state.thread,'largephoto'));w.append(content);nav(w)}
+// No future romance CG is visible in Photos before the associated story is finished.
+// Until canonical route/scene-to-image provenance is verified, unlock the album in the epilogue only.
+function unlockedPhotos(){
+ const scenes=window.BlackthornStory?.scenes||[];
+ const epilogue=scenes.findIndex(x=>x.scene_id==='S29');
+ const current=Number.isInteger(state.canonicalScene)?state.canonicalScene:-1;
+ return epilogue>=0&&current>=epilogue?photos[role]:[];
+}
+function drawPhotos(w){
+ header(w,'Photos');
+ const content=node('div',undefined,'content');
+ const available=unlockedPhotos();
+ if(!available.length)content.append(node('p','No photos have been added to your album yet. Memories will appear as the story unfolds.','notice'));
+ else{
+  const grid=node('div',undefined,'photogrid');
+  available.forEach(photoName=>{const a=img(photoName);a.addEventListener('click',()=>go('photo',photoName));grid.append(a)});
+  content.append(grid);
+ }
+ w.append(content);nav(w);
+}
+function drawPhoto(w){header(w,'Photo');let content=node('div',undefined,'content');if(unlockedPhotos().includes(state.thread))content.append(img(state.thread,'largephoto'));else content.append(node('p','This photo is not available yet.','notice'));w.append(content);nav(w)}
 function drawNotes(w){header(w,'Notes');const content=node('div',undefined,'content');content.append(node('p','Private notes — saved on this device only.','notice'));const a=node('textarea',undefined,'notearea');a.placeholder='Write down what you noticed…';a.value=state.notes||'';a.addEventListener('input',()=>{state.notes=a.value;save()});content.append(a);w.append(content);nav(w)}
 function drawOther(w){const view=state.view;header(w,({blackthorn:'Blackthorn',map:'Academy Map',calendar:'Calendar',calls:'Calls',camera:'Camera'}[view]||view));const content=node('div',undefined,'content');
 if(view==='blackthorn'){const card=node('div',undefined,'card');card.append(node('h3','Personal Academy Portal'),node('p','Preview chapter: '+STAGES[state.stage]+'. New messages appear in Messages as chapters are released.'));content.append(card);content.append(node('p',window.BlackthornStory?.scenes?'Your chapter follows the shared story.':'Preview only: this button simulates a new chapter on this phone.','notice'));if(!live)content.append(uiButton('Simulate next chapter →',()=>{state.stage=(state.stage+1)%STAGES.length;save();go('messages')},'plainbutton'));else {
