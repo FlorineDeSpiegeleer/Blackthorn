@@ -176,7 +176,7 @@ function next(){
  if(autonomous&&story[state.scene+1]?.scene_id==='S27'){
   toast('The final reveal is not yet implemented.');return;
  }
- if(autonomous&&readyList().length<3){toast('Waiting for all three players.');return;}
+ if(autonomous&&requiresReady()&&readyList().length<3){toast('Waiting for all three players.');return;}
  if(live&&director&&requiresReady()&&readyList().length<3){
   const content=document.createElement('div');
   const missing=playerNames.filter(role=>!readyList().includes(role));
@@ -272,7 +272,7 @@ if(live){
    const beats=window.BlackthornBeatPolicy?.publicBeats(scene.scene_id)||[];
    if(state.beat>=beats.length-1){
     if(/^P[1-4]_READY$/.test(String(scene.puzzle_marker||''))||story[state.scene+1]?.scene_id==='S27')return;
-    if(readyList().length===3)timer=setTimeout(()=>next(),1400);
+    if(!requiresReady()||readyList().length===3)timer=setTimeout(()=>next(),1400);
     return;
    }
    const text=String(beats[state.beat]?.text||'');
