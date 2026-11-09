@@ -170,6 +170,9 @@ function next(){
  if(live&&!director&&!autonomous || state.paused)return;
  const beats=window.BlackthornBeatPolicy?.publicBeats(currentScene()?.scene_id)||[];
  if(state.beat<beats.length-1){state.beat++;save();renderScene();broadcast();return;}
+ if(autonomous&&String(currentScene()?.case_key||'')){
+  toast('Rehearsal checkpoint: evidence viewer is not ready yet.');return;
+ }
  if(autonomous&&String(currentScene()?.puzzle_marker||'').match(/^P[1-4]_READY$/)){
   toast('Rehearsal stops at an unimplemented investigation checkpoint.');return;
  }
@@ -271,7 +274,7 @@ if(live){
    const scene=currentScene();if(!scene)return;
    const beats=window.BlackthornBeatPolicy?.publicBeats(scene.scene_id)||[];
    if(state.beat>=beats.length-1){
-    if(/^P[1-4]_READY$/.test(String(scene.puzzle_marker||''))||story[state.scene+1]?.scene_id==='S27')return;
+    if(String(scene.case_key||'')||/^P[1-4]_READY$/.test(String(scene.puzzle_marker||''))||story[state.scene+1]?.scene_id==='S27')return;
     if(!requiresReady()||readyList().length===3)timer=setTimeout(()=>next(),1400);
     return;
    }
