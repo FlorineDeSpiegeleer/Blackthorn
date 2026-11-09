@@ -4,7 +4,7 @@ Object.assign(window.BlackthornOpeningScript, {
   "S16": [
     {
       "speaker": "STAGE",
-      "text": "CONTENT NOTICE — The next scene includes a serious but non-fatal injury. The Director may pause before continuing."
+      "text": "CONTENT NOTICE — The next scene includes a serious but non-fatal injury. You can pause or take a break before continuing."
     },
     {
       "speaker": "STAGE",
