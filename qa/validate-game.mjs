@@ -97,6 +97,10 @@ for(const id of requiredPrivate){
 }
 check(get('phone/index.html').includes('phone-dialogue-expanded.js')&&get('phone/index.html').includes('phone-dialogue-week2.js'),'Phone does not load expanded private dialogue');
 check(get('phone/phone.js').includes('BlackthornPrivateDialogue'),'Phone does not render expanded private dialogue');
+check(get('phone/phone.js').includes('function unlockedPhotos()')&&get('phone/phone.js').includes('unlockedPhotos().includes(state.thread)'),'Photo album and deep link must use unlock gate');
+check(get('phone/phone.js').includes('pending.length>0'),'Ready must wait for private choices');
+check(get('projector.js').includes('if(autonomous&&requiresReady()&&readyList().length<3)'),'Autoplay must gate private windows');
+check(get('projector.js').includes('String(currentScene()?.case_key||\'\')'),'Autoplay must block unavailable evidence');
 
 // Exercise the actual role-condition evaluator with test-only state (no story text).
 const phone=get('phone/phone.js');
