@@ -15,6 +15,16 @@ const opening=context.window.BlackthornOpeningScript||{};
 const policy=context.window.BlackthornBeatPolicy;
 for(const id of ['S06A','S09C','S13','S16A','S19D','S22','S25'])if(policy.publicBeats(id).some(b=>policy.directorCues(id).includes(b)))throw new Error('Director cues leaked: '+id);
 if(policy.publicBeats('S13').length>=opening.S13.length)throw new Error('Private W3 cue still public');
+// A public screenplay must never display editor instructions, GM markers or future-route metadata.
+for(const [id] of Object.entries(opening)){
+ for(const beat of policy.publicBeats(id)){
+  if(beat.speaker==='STAGE' && /\\b(?:Director|GM-only|CASE_\\d+|P0\\d{2}|canonical source|do not|route scoring|engagement counters|not implemented)\\b/i.test(beat.text))
+   throw new Error('Internal stage cue visible in '+id);
+ }
+}
+if(!policy.publicBeats('S16').some(beat=>beat.text.startsWith('CONTENT NOTICE')))
+ throw new Error('S16 content warning must be visible to players');
+
 for(const id of ['S00','S01','S02','S03','S04','S05','S06','S06A','S06B','S07','S08','S09A','S09B','S09C','S10','S11','S12A','S12B','S12C','S13','S14','S14B','S15','S16','S16A','S16B','S16C','S17','S18','S19A','S19B','S19C','S19D','S19E','S20','S21','S22','S23','S24A','S24B','S24C','S25','S26','S28','S29','S30']){
  const beats=opening[id];
  if(!Array.isArray(beats)||beats.length<2)throw new Error('Opening screenplay missing '+id);
