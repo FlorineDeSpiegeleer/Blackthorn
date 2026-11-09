@@ -212,12 +212,14 @@ if(view==='blackthorn'){const card=node('div',undefined,'card');card.append(node
  content.append(node('p','The shared story continues automatically after all three players are ready.','notice'));
  const current=Number(state.canonicalScene)||0;
  const already=state.readyForScene===current;
+ const pending=canonicalEntries()?.filter(entry=>entry.at===current&&entry.choices?.length&&!Object.prototype.hasOwnProperty.call(state.answers,entry.id))||[];
+ if(pending.length)content.append(node('p','You have '+pending.length+' unanswered private choice(s). Open Messages and finish them before marking yourself ready.','notice'));
  const ready=uiButton(already?'✓ Ready — waiting for the others':'✓ I am ready for the next scene',()=>{
   state.readyForScene=current;save();
   sync.publishReady(role,current);
   render();
  },'plainbutton');
- ready.disabled=already||remotelyPaused;content.append(ready);
+ ready.disabled=already||remotelyPaused||pending.length>0;content.append(ready);
  const scene=window.BlackthornStory?.scenes?.[current];
  const marker=String(scene?.puzzle_marker||'');
  const puzzle=/^P[1-4]_READY$/.test(marker)?marker.slice(0,2):'';
